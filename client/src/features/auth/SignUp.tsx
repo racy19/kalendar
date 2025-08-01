@@ -1,6 +1,7 @@
 import { useState } from "react";
 import InputText from "../../components/InputText"
-import ButtonSubmit from "../../components/buttonSubmit";
+import { Link } from "react-router-dom";
+import ButtonSubmit from "../../components/ButtonSubmit";
 
 const SignUp = () => {
     const [formData, setFormData] = useState({
@@ -9,6 +10,7 @@ const SignUp = () => {
         password: "",
     });
     const [sucessSignUp, setSucessSignUp] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -28,35 +30,41 @@ const SignUp = () => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    // name: formData.username,
+                    name: formData.username,
                     email: formData.email,
-                    authType: "local", // nebo nechat undefined
-                    passwordHash: formData.password, // bude zahashováno na serveru
+                    authType: "local",
+                    password: formData.password,
                 }),
             });
 
+            const data = await response.json();
+
+            if (!response.ok) {
+                setErrorMessage(data.error || "Chyba při registraci");
+                return;
+              }
+
             if (response.ok) {
-                const data = await response.json();
                 console.log("Uživatel vytvořen:", data.user);
                 setSucessSignUp(true);
                 // např. přesměrování nebo zobrazení hlášky
             } else if (response.status === 409) {
                 const error = await response.json();
-                alert("Uživatel už existuje: " + error.error);
+                setErrorMessage("Uživatel už existuje: " + error.error);
             } else {
                 const error = await response.json();
-                alert("Chyba: " + error.error);
+                setErrorMessage("Chyba: " + error.error);
             }
         } catch (err) {
             console.error("Chyba při připojení k serveru:", err);
-            alert("Chyba při odesílání dat.");
+            setErrorMessage("Chyba při odesílání dat.");
         }
     };
 
     return (
-        <>
+        <div className="login-page-container mt-5">
             <h1>Registrace</h1>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="p-4 border rounded bg-light">
                 {/* zkontrolovat, zda api umoznuje ukladat username */}
                 <InputText
                     id="username"
@@ -81,9 +89,15 @@ const SignUp = () => {
                 <ButtonSubmit
                     text="Registrovat"
                 />
+                {errorMessage && (
+                        <div className="alert alert-danger mt-3">
+                            {errorMessage}
+                            {errorMessage.includes("Google") && <> <Link to="/login">Přihlásit</Link></>}
+                        </div>
+                    )}
+                {sucessSignUp && <p className="mt-3">Registrace proběhla úspěšně! <Link to="/login">Přihlásit</Link></p>}
             </form>
-            {sucessSignUp && <p>Registrace proběhla úspěšně!</p>}
-        </>
+        </div>
     )
 }
 

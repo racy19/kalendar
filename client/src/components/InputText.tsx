@@ -11,8 +11,13 @@ interface InputTextProps {
 
 const InputText = ({ label, id, type = "text", placeholder = "", value, onChange, required = false }: InputTextProps) => {
     return (
-        <>
-            {label && <label htmlFor={id}>{label}{required ? "* " : ""}: </label>}
+        <div className="mb-3">
+            {label && (
+                <label htmlFor={id} className="form-label">
+                    {label}
+                    {required ? "*" : ""}:
+                </label>
+            )}
             <input
                 id={id}
                 name={id}
@@ -21,8 +26,10 @@ const InputText = ({ label, id, type = "text", placeholder = "", value, onChange
                 value={value}
                 onChange={onChange}
                 required={required}
+                className="form-control"
             />
-        </>
+        </div>
+
     );
 };
 

@@ -1,0 +1,37 @@
+.login-page-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.login-form-container {
+    display: flex;
+}
+
+.login-form {
+    border-right: 1px solid #ddd;
+    flex: 1 1 350px;
+}
+
+.calendar-cell {
+    min-height: 12vh;
+    font-size: 0.9rem;
+    aspect-ratio: unset;
+}
+
+.calendar-cell-header {
+    padding: 0.5rem 0;
+}
+
+.calendar-body .row {
+    flex: 1 1 0;
+    min-height: 0;
+}
+
+.calendar-wrapper {
+    overflow-y: auto;
+}
+
+.calendar-headline {
+    display: inline-block;
+    width: 170px;
+}
