@@ -14,22 +14,26 @@ const Calendar = () => {
     const [yearToShow, setYearToShow] = useState(current.year);
     const [monthToShow, setMonthToShow] = useState(current.month);
 
-/**
- * @param month 1 - leden, 2 - únor, ..., 12 - prosinec
- * @description Returns the number of days in a given month of a given year.
- * @example getDaysInMonth(2023, 2) // returns 28
- */
+
     const firstDayOfMonth = new Date(yearToShow, monthToShow, 1);
     const firstDayOfMonthIndex = (firstDayOfMonth.getDay() + 6) % 7; // Po = 0
 
+    /**
+    * @param month 1 - leden, 2 - únor, ..., 12 - prosinec
+    * @description Returns the number of days in a given month of a given year.
+    * @example getDaysInMonth(2023, 2) // returns 28
+    */
     const getDaysInMonth = (year: number, month: number): number =>
         new Date(year, month + 1, 0).getDate();
 
     const daysInCurrentMonth = getDaysInMonth(yearToShow, monthToShow);
-    const daysInPrevMonth = getDaysInMonth(
-        monthToShow === 0 ? yearToShow - 1 : yearToShow,
-        monthToShow === 0 ? 11 : monthToShow - 1
-    );
+
+    // return day of the month before the first day of the current month
+    const dateBeforeFirstDay = (dayCount: number) => {
+        const returnDay = new Date(yearToShow, monthToShow, 1);
+        returnDay.setDate(returnDay.getDate() - dayCount);
+        return returnDay.getDate();
+    }
 
     const getCalRowCount = () =>
         Math.ceil((firstDayOfMonthIndex + daysInCurrentMonth) / 7);
@@ -54,75 +58,66 @@ const Calendar = () => {
         setYearToShow(nextYear);
     };
 
-    const calendarRows = useMemo(() => {
-        const rows = [];
-
-        for (let rowIndex = 0; rowIndex < getCalRowCount(); rowIndex++) {
-            const cols = [];
-
-            for (let colIndex = 0; colIndex < 7; colIndex++) {
-                const cellIndex = rowIndex * 7 + colIndex;
-                const dayNumber = cellIndex - firstDayOfMonthIndex + 1;
-
-                let displayDay: number;
-                let isCurrentMonth = true;
-
-                if (dayNumber <= 0) {
-                    displayDay = daysInPrevMonth + dayNumber;
-                    isCurrentMonth = false;
-                } else if (dayNumber > daysInCurrentMonth) {
-                    displayDay = dayNumber - daysInCurrentMonth;
-                    isCurrentMonth = false;
-                } else {
-                    displayDay = dayNumber;
-                }
-
-                const isToday =
-                    isCurrentMonth &&
-                    displayDay === current.day &&
-                    monthToShow === current.month &&
-                    yearToShow === current.year;
-
-                cols.push(
-                    <div
-                        key={colIndex}
-                        className={`col border position-relative text-start p-2 calendar-cell ${isToday
-                                ? "bg-primary text-white"
-                                : isCurrentMonth
-                                    ? ""
-                                    : "text-muted bg-light"
-                            }`}
-                    >
-                        <small className="position-absolute top-0 end-0 m-1">
-                            {displayDay}
-                        </small>
-                    </div>
-                );
+    const calendarDayNumberArray = useMemo(() => {
+        const daysToShow: any[][] = [];
+        let row: any[] = [];
+        for (let i = 0; i < getCalRowCount() * 7; i++) {
+            if (i < firstDayOfMonthIndex) {
+                const day = dateBeforeFirstDay(firstDayOfMonthIndex - i);
+                row.push({
+                    day: day,
+                    isCurrentMonth: false
+                });
+            } else if (i < firstDayOfMonthIndex + daysInCurrentMonth) {
+                row.push({
+                    day: i - firstDayOfMonthIndex + 1,
+                    isCurrentMonth: true
+                });
+            } else {
+                row.push({
+                    day: i - firstDayOfMonthIndex - daysInCurrentMonth + 1,
+                    isCurrentMonth: false
+                });
             }
-
-            rows.push(
-                <div key={rowIndex} className="row flex-fill">
-                    {cols}
-                </div>
-            );
+            if ((i + 1) % 7 === 0) {
+                daysToShow.push(row);
+                row = []; // reset row for next week
+            }
         }
+        return daysToShow;
+    }, [yearToShow, monthToShow, daysInCurrentMonth, firstDayOfMonthIndex]);
 
-        return rows;
-    }, [
-        monthToShow,
-        yearToShow,
-        daysInCurrentMonth,
-        daysInPrevMonth,
-        firstDayOfMonthIndex,
-        current,
-    ]);
+    const daysMapped = calendarDayNumberArray.map((row, rowIndex) => (
+            <div key={rowIndex} className="row flex-fill">
+                {row.map((cell, colIndex) => {
+                    const isToday =
+                        cell.isCurrentMonth && cell.day === current.day &&
+                        monthToShow === current.month && yearToShow === current.year;
+                    return (
+                        <div
+                            key={colIndex}
+                            className={`col border position-relative text-start p-2 calendar-cell ${isToday ?
+                                "bg-primary text-white"
+                                : cell.isCurrentMonth
+                                    ? ""
+                                    : "text-muted bg-light"}`}
+                        >
+                            <small className="position-absolute top-0 end-0 m-1">
+                                {cell.day}
+                            </small>
+                        </div>
+                    )
+                }
+                )}
+            </div>
+        ));
 
     return (
         <div className="calendar-wrapper" style={{ height: "calc(100vh - 100px)" }}>
             <div className="container h-100 d-flex flex-column">
-            <p className="mt-3">
-                <Link to="/dashboard">{"< Zpět na dashboard"}</Link>
-            </p>
+                <p className="mt-3">
+                    <Link to="/dashboard">{"< Zpět na dashboard"}</Link>
+                </p>
                 <h3 className="mt-3 mb-4 text-center">
                     <button className="btn btn-primary me-2" onClick={getPrevMonth}>
                         &lt;
@@ -143,7 +138,8 @@ const Calendar = () => {
                     ))}
                 </div>
 
-                <div className="calendar-body flex-grow-1">{calendarRows}</div>
+                <div className="calendar-body flex-grow-1">{daysMapped}</div>
+
             </div>
         </div>
     );

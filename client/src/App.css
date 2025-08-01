@@ -35,3 +35,9 @@
     display: inline-block;
     width: 170px;
 }
+
+@media screen and (max-width: 576px) {
+    .login-form-container {
+        flex-wrap: wrap;
+    }
+}
