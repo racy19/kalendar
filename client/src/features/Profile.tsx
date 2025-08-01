@@ -28,7 +28,7 @@ const Profile = () => {
             if (!user || !token) return;
 
             try {
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/user/${user.id}`, {
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/user/${user.id}`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -52,7 +52,7 @@ const Profile = () => {
         if (!user || !token || !newName) return;
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/user/${user.id}`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/user/${user.id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -76,7 +76,7 @@ const Profile = () => {
         if (!user || !token) return;
 
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/user/${user.id}/password`, {
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/user/${user.id}/password`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
