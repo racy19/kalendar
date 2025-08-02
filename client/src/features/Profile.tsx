@@ -15,6 +15,7 @@ const Profile = () => {
     const token = useSelector((state: RootState) => state.auth.token);
 
     const [userData, setUserData] = useState<UserData | null>(null);
+    const [userDataFetched, setUserDataFetched] = useState(false);
     const [loading, setLoading] = useState(true);
     const [changeNameForm, setChangeNameForm] = useState(false);
     const [newName, setNewName] = useState("");
@@ -37,6 +38,7 @@ const Profile = () => {
 
                 const data = await res.json();
                 setUserData(data);
+                setUserDataFetched(true);
             } catch (err) {
                 console.error(err);
             } finally {
@@ -139,7 +141,7 @@ const Profile = () => {
                 </>
             )}
 
-            {userData?.authType !== 'google' &&
+            {userDataFetched && userData?.authType !== 'google' && (
                 <div id="password-change">
                     <h2 className="mt-5">Změnit heslo</h2>
                     <InputText
@@ -163,7 +165,9 @@ const Profile = () => {
                     {renewPasswordMessage && (
                         <div className="alert alert-info mt-3">{renewPasswordMessage}</div>
                     )}
-                </div>}
+                </div>
+            )}
+
 
         </div>
     );
