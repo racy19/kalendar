@@ -205,7 +205,7 @@ router.put('/user/:id/password', verifyToken, async (req, res) => {
       return res.status(404).json({ error: 'Uživatel nenalezen' });
     }
 
-    // 🔐 Blokace změny hesla pro Google účty
+    // block password change for Google accounts
     if (user.authType === 'google') {
       return res.status(403).json({ error: 'Google účty nemohou měnit heslo' });
     }
@@ -228,6 +228,5 @@ router.put('/user/:id/password', verifyToken, async (req, res) => {
     res.status(500).json({ error: 'Chyba při změně hesla' });
   }
 });
-
 
 module.exports = router;

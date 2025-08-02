@@ -47,6 +47,7 @@ const Login = () => {
                 setErrorMessage(data.error || "Chyba při přihlášení");
                 return;
               }
+              
 
             if (response.ok) {
                 console.log("Přihlášení úspěšné:", data);
