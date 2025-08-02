@@ -1,8 +1,12 @@
 
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 
-const Calendar = () => {
+interface CalendarProps {
+    selectedDates?: Date[]; // Optional prop for selected dates
+    handleOnClick?: (date: Date) => void;
+}
+
+const Calendar = ({ selectedDates, handleOnClick }: CalendarProps) => {
     const today = new Date();
 
     const current = {
@@ -66,17 +70,22 @@ const Calendar = () => {
                 const day = dateBeforeFirstDay(firstDayOfMonthIndex - i);
                 row.push({
                     day: day,
-                    isCurrentMonth: false
+                    isCurrentMonth: false,
+                    date: new Date(yearToShow, monthToShow - 1, day)
                 });
             } else if (i < firstDayOfMonthIndex + daysInCurrentMonth) {
+                const day = i - firstDayOfMonthIndex + 1;
                 row.push({
-                    day: i - firstDayOfMonthIndex + 1,
-                    isCurrentMonth: true
+                    day: day,
+                    isCurrentMonth: true,
+                    date: new Date(yearToShow, monthToShow, day)
                 });
             } else {
+                const day = i - firstDayOfMonthIndex - daysInCurrentMonth + 1;
                 row.push({
-                    day: i - firstDayOfMonthIndex - daysInCurrentMonth + 1,
-                    isCurrentMonth: false
+                    day: day,
+                    isCurrentMonth: false,
+                    date: new Date(yearToShow, monthToShow + 1, day)
                 });
             }
             if ((i + 1) % 7 === 0) {
@@ -88,37 +97,37 @@ const Calendar = () => {
     }, [yearToShow, monthToShow, daysInCurrentMonth, firstDayOfMonthIndex]);
 
     const daysMapped = calendarDayNumberArray.map((row, rowIndex) => (
-            <div key={rowIndex} className="row flex-fill">
-                {row.map((cell, colIndex) => {
-                    const isToday =
-                        cell.isCurrentMonth && cell.day === current.day &&
-                        monthToShow === current.month && yearToShow === current.year;
-                    return (
-                        <div
-                            key={colIndex}
-                            className={`col border position-relative text-start p-2 calendar-cell ${isToday ?
-                                "bg-primary text-white"
+        <div key={rowIndex} className="row flex-fill">
+            {row.map((cell, colIndex) => {
+                const isToday =
+                    cell.isCurrentMonth && cell.day === current.day &&
+                    monthToShow === current.month && yearToShow === current.year;
+                return (
+                    <div
+                        key={colIndex}
+                        className={`col border position-relative text-start p-2 calendar-cell ${selectedDates?.includes(cell.date)
+                            ? "bg-success text-white"
+                            : isToday
+                                ? "bg-primary text-white"
                                 : cell.isCurrentMonth
                                     ? ""
                                     : "text-muted bg-light"}`}
-                        >
-                            <small className="position-absolute top-0 end-0 m-1">
-                                {cell.day}
-                            </small>
-                        </div>
-                    )
-                }
-                )}
-            </div>
-        ));
+                        onClick={() => handleOnClick?.(cell.date)}
+                    >
+                        <small className="position-absolute top-0 end-0 m-1">
+                            {cell.day}
+                        </small>
+                    </div>
+                )
+            }
+            )}
+        </div>
+    ));
 
     return (
         <div className="calendar-wrapper" style={{ height: "calc(100vh - 100px)" }}>
             <div className="container h-100 d-flex flex-column">
-                <p className="mt-3">
-                    <Link to="/dashboard">{"< Zpět na dashboard"}</Link>
-                </p>
-                <h3 className="mt-3 mb-4 text-center">
+                <h4 className="mt-3 mb-4 text-center">
                     <button className="btn btn-primary me-2" onClick={getPrevMonth}>
                         &lt;
                     </button>
@@ -128,7 +137,7 @@ const Calendar = () => {
                     <button className="btn btn-primary ms-2" onClick={getNextMonth}>
                         &gt;
                     </button>
-                </h3>
+                </h4>
 
                 <div className="row bg-light border-bottom text-center fw-bold">
                     {dayRow.map((day, index) => (

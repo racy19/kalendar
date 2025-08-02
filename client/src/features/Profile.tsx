@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
-import { Link } from "react-router-dom";
 import InputText from "../components/InputText";
 import ButtonSubmit from "../components/ButtonSubmit";
 
@@ -105,10 +104,6 @@ const Profile = () => {
 
     return (
         <div className="profile-container container mt-5">
-            <p className="mt-3">
-                <Link to="/dashboard">{"< Zpět na dashboard"}</Link>
-            </p>
-
             <h1>Profil uživatele</h1>
 
             <div className="d-flex gap-2">

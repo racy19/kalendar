@@ -55,7 +55,7 @@ router.post('/login', async (req, res) => {
     }
 
     if (!user.passwordHash) {
-      return res.status(403).json({ error: 'Tento účet nemá nastavené heslo, nebo se přihlašuje přes Google SSO' });
+      return res.status(403).json({ error: 'Tento účet nemá nastavené heslo, nebo se přihlašuje přes Google OAuth' });
     }
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);

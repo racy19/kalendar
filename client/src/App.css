@@ -36,6 +36,12 @@
     width: 170px;
 }
 
+.link-white {
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+}
+
 @media screen and (max-width: 576px) {
     .login-form-container {
         flex-wrap: wrap;
