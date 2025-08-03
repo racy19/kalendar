@@ -42,7 +42,7 @@ const SignUp = () => {
             if (!response.ok) {
                 setErrorMessage(data.error || "Chyba při registraci");
                 return;
-              }
+            }
 
             if (response.ok) {
                 console.log("Uživatel vytvořen:", data.user);
@@ -63,8 +63,10 @@ const SignUp = () => {
 
     return (
         <div className="login-page-container mt-5">
-            <h1>Registrace</h1>
-            <form onSubmit={handleSubmit} className="p-4 border rounded bg-light">
+            <h1 className="d-flex justify-content-between align-items-baseline">
+                <span>Registrace</span>
+                <span className="text-muted small">Kalendář App</span>
+            </h1>            <form onSubmit={handleSubmit} className="p-4 border rounded bg-light">
                 {/* zkontrolovat, zda api umoznuje ukladat username */}
                 <InputText
                     id="username"
@@ -90,12 +92,13 @@ const SignUp = () => {
                     text="Registrovat"
                 />
                 {errorMessage && (
-                        <div className="alert alert-danger mt-3">
-                            {errorMessage}
-                            {errorMessage.includes("Google") && <> <Link to="/login">Přihlásit</Link></>}
-                        </div>
-                    )}
+                    <div className="alert alert-danger mt-3">
+                        {errorMessage}
+                        {errorMessage.includes("Google") && <> <Link to="/login">Přihlásit</Link></>}
+                    </div>
+                )}
                 {sucessSignUp && <p className="mt-3">Registrace proběhla úspěšně! <Link to="/login">Přihlásit</Link></p>}
+                {!sucessSignUp && <p className="mt-3 mb-0">Máte již účet? <Link to="/login">Přihlásit</Link></p>}
             </form>
         </div>
     )

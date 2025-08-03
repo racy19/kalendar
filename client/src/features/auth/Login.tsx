@@ -5,6 +5,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from 'react-redux';
 import { login } from '../../store/authSlice';
 import { GoogleLogin } from '@react-oauth/google';
+import { Tooltip } from 'react-tooltip';
+import 'react-tooltip/dist/react-tooltip.css';
 
 const Login = () => {
     const dispatch = useDispatch();
@@ -46,8 +48,8 @@ const Login = () => {
             if (!response.ok) {
                 setErrorMessage(data.error || "Chyba při přihlášení");
                 return;
-              }
-              
+            }
+
 
             if (response.ok) {
                 console.log("Přihlášení úspěšné:", data);
@@ -77,44 +79,47 @@ const Login = () => {
 
     const handleGoogleLogin = async (googleToken: string) => {
         try {
-          const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/google-login`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ credential: googleToken }),
-          });
-      
-          const data = await res.json();
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/google-login`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ credential: googleToken }),
+            });
 
-          if (!res.ok) {
-            console.error("Google login error:", data.error);
-            setErrorMessage(data.error || "Chyba při přihlášení přes Google.");
-            return;
-          }
-      
-          if (res.ok) {
-            dispatch(login({
-              user: {
-                id: data.user.id,
-                name: data.user.name,
-                email: data.user.email,
-              },
-              token: data.token,
-            }));
-            navigate("/dashboard");
-          } else {
-            console.error("Google login error:", data.error);
-          }
+            const data = await res.json();
+
+            if (!res.ok) {
+                console.error("Google login error:", data.error);
+                setErrorMessage(data.error || "Chyba při přihlášení přes Google.");
+                return;
+            }
+
+            if (res.ok) {
+                dispatch(login({
+                    user: {
+                        id: data.user.id,
+                        name: data.user.name,
+                        email: data.user.email,
+                    },
+                    token: data.token,
+                }));
+                navigate("/dashboard");
+            } else {
+                console.error("Google login error:", data.error);
+            }
         } catch (err) {
-          console.error("Chyba při přihlášení přes Google:", err);
+            console.error("Chyba při přihlášení přes Google:", err);
         }
-      };
-      
+    };
+
 
     return (
         <div className="login-page-container mt-5">
-            <h1>Přihlášení</h1>
+            <h1 className="d-flex justify-content-between align-items-baseline">
+                <span>Přihlášení</span>
+                <span className="text-muted small">Kalendář App</span>
+            </h1>
             <form onSubmit={handleSubmit} className="border rounded bg-light login-form-container">
                 <div className="login-form p-4">
                     <InputText
@@ -138,8 +143,20 @@ const Login = () => {
                         </div>
                     )}
                     {loginSuccess && <p className="mt-3 text-success">Přihlášení proběhlo úspěšně!</p>}
-                    <p className="mt-3">Zapomenuté heslo = smůla</p>
-                    <p className="mt-4">Nemáte ještě účet? <Link to="/signup">Registrujte</Link> se.</p>
+                    <p className="mt-3"                    >
+                        Zapomenuté heslo = smůla
+                        <sup
+                            className="border rounded py-0 px-1"
+                            data-tooltip-id="forgot-password-tooltip"
+                            data-tooltip-content="Vývojářka této stránky je líná a zatím nevytvořila utilitu pro obnovu hesla. V případě velkého zájmu o změnu hesla ji kontaktujte.">
+                            ?
+                        </sup>
+                    </p>
+                    <Tooltip
+                        id="forgot-password-tooltip"
+                        place="top"
+                    />
+                    <p className="mt-4 mb-0">Nemáte ještě účet? <Link to="/signup">Registrujte</Link> se.</p>
                 </div>
                 <div className="p-4 d-flex flex-column align-items-center justify-content-center">
                     <GoogleLogin

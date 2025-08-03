@@ -2,9 +2,21 @@ import { useState } from "react";
 import ButtonSubmit from "../components/ButtonSubmit";
 import Calendar from "../components/Calendar";
 import InputText from "../components/InputText";
+import { useSelector } from "react-redux";
+import { RootState } from "../store/store";
+import { useNavigate } from "react-router-dom";
 
 const CreateEvent = () => {
+    const navigate = useNavigate();
+
     const [selectedDates, setSelectedDates] = useState<Date[]>([]);
+    const [formData, setFormData] = useState({
+        title: "",
+        description: "",
+    });
+    const [errorMessage, setErrorMessage] = useState("");
+
+    const userId = useSelector((state: RootState) => state.auth.user?.id);
 
     const handleDateToggle = (date: Date) => {
         setSelectedDates(prevDate =>
@@ -14,26 +26,81 @@ const CreateEvent = () => {
         );
     };
 
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (selectedDates.length === 0) {
+            setErrorMessage("Musíte vybrat alespoň jedno datum.");
+            return;
+        } else {
+            setErrorMessage("");
+        }
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/events`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    title: formData.title,
+                    description: formData.description,
+                    dates: selectedDates,
+                    userId: userId,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                setErrorMessage(data.error || "Chyba při vytváření události");
+                return;
+            }
+            navigate("/dashboard");
+        } catch (error) {
+            console.error("Chyba při vytváření události:", error);
+            setErrorMessage("Chyba při vytváření události");
+        }
+    }
+
+
+
     return (
         <div className="container mt-5">
             <h1>Vytvořit událost</h1>
-            <InputText
-                id="eventTitle"
-                label="Název události"
-                required={true}
-            />
-            <InputText
-                id="eventDescription"
-                label="Popis události"
-                required={false}
-            />
-            <p className="mt-5">
-                Vyberte datum a čas události pomocí kalendáře níže.
-            </p>
-            <Calendar handleOnClick={handleDateToggle} selectedDates={selectedDates}/>
-            <ButtonSubmit
-                text="Vytvořit událost"
-            />
+            <form onSubmit={handleSubmit}>
+                <InputText
+                    id="title"
+                    label="Název události"
+                    required={true}
+                    onChange={handleChange}
+                />
+                <InputText
+                    id="description"
+                    label="Popis události"
+                    required={false}
+                    onChange={handleChange}
+                />
+                <p className="mt-5">
+                    Vyberte datum a čas události pomocí kalendáře níže.
+                </p>
+                <Calendar handleOnClick={handleDateToggle} selectedDates={selectedDates} />
+                {errorMessage && (
+                    <div className="alert alert-danger mt-3">
+                        {errorMessage}
+                    </div>
+                )}
+                <ButtonSubmit
+                    text="Vytvořit událost"
+                    className="mt-3"
+                />
+            </form>
         </div>
     );
 }
