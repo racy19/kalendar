@@ -1,8 +1,7 @@
-
 import { useMemo, useState } from "react";
 
 interface CalendarProps {
-    selectedDates?: Date[]; // Optional prop for selected dates
+    selectedDates?: Date[];
     handleOnClick?: (date: Date) => void;
 }
 
@@ -18,9 +17,8 @@ const Calendar = ({ selectedDates, handleOnClick }: CalendarProps) => {
     const [yearToShow, setYearToShow] = useState(current.year);
     const [monthToShow, setMonthToShow] = useState(current.month);
 
-
     const firstDayOfMonth = new Date(yearToShow, monthToShow, 1);
-    const firstDayOfMonthIndex = (firstDayOfMonth.getDay() + 6) % 7; // Po = 0
+    const firstDayOfMonthIndex = (firstDayOfMonth.getDay() + 6) % 7;
 
     /**
     * @param month 1 - leden, 2 - únor, ..., 12 - prosinec
@@ -37,7 +35,7 @@ const Calendar = ({ selectedDates, handleOnClick }: CalendarProps) => {
         const returnDay = new Date(yearToShow, monthToShow, 1);
         returnDay.setDate(returnDay.getDate() - dayCount);
         return returnDay.getDate();
-    }
+    };
 
     const getCalRowCount = () =>
         Math.ceil((firstDayOfMonthIndex + daysInCurrentMonth) / 7);
@@ -65,34 +63,34 @@ const Calendar = ({ selectedDates, handleOnClick }: CalendarProps) => {
     const calendarDayNumberArray = useMemo(() => {
         const daysToShow: any[][] = [];
         let row: any[] = [];
+
         for (let i = 0; i < getCalRowCount() * 7; i++) {
+            let day: number;
+            let date: Date;
+            let isCurrentMonth: boolean;
+
             if (i < firstDayOfMonthIndex) {
-                const day = dateBeforeFirstDay(firstDayOfMonthIndex - i);
-                row.push({
-                    day: day,
-                    isCurrentMonth: false,
-                    date: new Date(yearToShow, monthToShow - 1, day)
-                });
+                day = dateBeforeFirstDay(firstDayOfMonthIndex - i);
+                date = new Date(yearToShow, monthToShow - 1, day, 12);
+                isCurrentMonth = false;
             } else if (i < firstDayOfMonthIndex + daysInCurrentMonth) {
-                const day = i - firstDayOfMonthIndex + 1;
-                row.push({
-                    day: day,
-                    isCurrentMonth: true,
-                    date: new Date(yearToShow, monthToShow, day)
-                });
+                day = i - firstDayOfMonthIndex + 1;
+                date = new Date(yearToShow, monthToShow, day, 12);
+                isCurrentMonth = true;
             } else {
-                const day = i - firstDayOfMonthIndex - daysInCurrentMonth + 1;
-                row.push({
-                    day: day,
-                    isCurrentMonth: false,
-                    date: new Date(yearToShow, monthToShow + 1, day)
-                });
+                day = i - firstDayOfMonthIndex - daysInCurrentMonth + 1;
+                date = new Date(yearToShow, monthToShow + 1, day, 12);
+                isCurrentMonth = false;
             }
+
+            row.push({ day, date, isCurrentMonth });
+
             if ((i + 1) % 7 === 0) {
                 daysToShow.push(row);
                 row = []; // reset row for next week
             }
         }
+
         return daysToShow;
     }, [yearToShow, monthToShow, daysInCurrentMonth, firstDayOfMonthIndex]);
 
@@ -100,27 +98,34 @@ const Calendar = ({ selectedDates, handleOnClick }: CalendarProps) => {
         <div key={rowIndex} className="row flex-fill">
             {row.map((cell, colIndex) => {
                 const isToday =
-                    cell.isCurrentMonth && cell.day === current.day &&
-                    monthToShow === current.month && yearToShow === current.year;
+                    cell.isCurrentMonth &&
+                    cell.day === current.day &&
+                    monthToShow === current.month &&
+                    yearToShow === current.year;
+
+                const isSelected = selectedDates?.some(
+                    (d) => d.getTime() === cell.date.getTime()
+                );
+
                 return (
                     <div
                         key={colIndex}
-                        className={`col border position-relative text-start p-2 calendar-cell ${selectedDates?.includes(cell.date)
-                            ? "bg-success text-white"
-                            : isToday
-                                ? "bg-primary text-white"
-                                : cell.isCurrentMonth
-                                    ? ""
-                                    : "text-muted bg-light"}`}
+                        className={`col border position-relative text-start p-2 calendar-cell ${isSelected
+                                ? "bg-success text-white"
+                                : isToday
+                                    ? "bg-primary text-white"
+                                    : cell.isCurrentMonth
+                                        ? ""
+                                        : "text-muted bg-light"
+                            }`}
                         onClick={() => handleOnClick?.(cell.date)}
                     >
                         <small className="position-absolute top-0 end-0 m-1">
                             {cell.day}
                         </small>
                     </div>
-                )
-            }
-            )}
+                );
+            })}
         </div>
     ));
 
@@ -148,7 +153,6 @@ const Calendar = ({ selectedDates, handleOnClick }: CalendarProps) => {
                 </div>
 
                 <div className="calendar-body flex-grow-1">{daysMapped}</div>
-
             </div>
         </div>
     );

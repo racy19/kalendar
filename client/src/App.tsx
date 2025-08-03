@@ -8,6 +8,7 @@ import Profile from "./features/Profile";
 import Calendar from "./components/Calendar";
 import CreateEvent from "./pages/createEvent";
 import Layout from "./pages/layout/Layout";
+import Event from "./pages/event";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/create-event" element={<CreateEvent />} />
+          <Route path="/event/:id" element={<Event />} />
         </Route>
       </Route>
     </Routes>

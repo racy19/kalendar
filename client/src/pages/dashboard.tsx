@@ -71,7 +71,12 @@ const Dashboard = () => {
             const dateString = event.dates.map(date => new Date(date).toLocaleDateString());
             return (
               <li key={event._id}>
-                <strong>{event.title} </strong><button
+                <strong onClick={() => navigate(`/event/${event._id}`)}>{event.title} </strong>
+                <button
+                  className="btn btn-sm btn-success"
+                  onClick={() => navigate(`/event/${event._id}`)}
+                >zobrazit</button>
+                <button
                   className="btn btn-sm btn-danger"
                   onClick={() => handleDelete(event._id)}
                 >smazat</button><br />
