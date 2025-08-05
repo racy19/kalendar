@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const Event = require('../models/Event');
+const slugify = require('slugify');
+const { v4: uuidv4 } = require('uuid');
 
 // set new event
 router.post('/', async (req, res) => {
@@ -13,11 +15,17 @@ router.post('/', async (req, res) => {
             return res.status(400).json({ error: 'Chybí povinná pole' });
         }
 
+        // create uniquie slug
+        const slug = slugify(title, { lower: true, strict: true });
+        const shortHash = uuidv4().split('-')[0];
+        const publicId = `${slug}-${shortHash}`;
+
         const event = new Event({
             title,
             description,
             dates,
-            user: userId
+            user: userId,
+            publicId
         });
 
         await event.save();
@@ -47,15 +55,15 @@ router.get("/user/:userId", async (req, res) => {
 });
 
 // get an event by ID
-router.get("/:eventId", async (req, res) => {
+router.get("/:publicId", async (req, res) => {
     try {
-        const eventId = req.params.eventId;
+        const publicId = req.params.publicId;
 
-        if (!mongoose.Types.ObjectId.isValid(eventId)) {
-            return res.status(400).json({ error: "Neplatné eventId" });
-        }
+        // if (!mongoose.Types.ObjectId.isValid(publicId)) {
+        //     return res.status(400).json({ error: "Neplatné event Id" });
+        // }
 
-        const event = await Event.findById(eventId);
+        const event = await Event.findOne({publicId: publicId});
 
         if (!event) {
             return res.status(404).json({ error: "Událost nenalezena" });
@@ -69,10 +77,10 @@ router.get("/:eventId", async (req, res) => {
 });
 
 // delete an event by ID
-router.delete("/:eventId", async (req, res) => {
+router.delete("/:publicId", async (req, res) => {
     try {
-        const eventId = req.params.eventId;
-        await Event.findByIdAndDelete(eventId);
+        const publicId = req.params.publicId;
+        await Event.findOneAndDelete({publicId: publicId});
         res.status(200).json({ message: "Událost byla smazána." });
     } catch (err) {
         console.error("Chyba při mazání události:", err);

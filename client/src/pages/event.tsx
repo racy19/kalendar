@@ -3,15 +3,15 @@ import { Link, useParams } from "react-router-dom";
 import Calendar from "../components/Calendar";
 
 const Event = () => {
-    const { id } = useParams<{ id: string }>();
+    const { publicId } = useParams<{ publicId: string }>();
     const [event, setEvent] = useState<any>(null);
     const [dates, setDates] = useState<Date[]>([]);
 
     useEffect(() => {
         const fetchEvent = async () => {
-            if (!id) return;
+            if (!publicId) return;
             try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/events/${id}`);
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/events/${publicId}`);
                 if (!response.ok) throw new Error("Chyba při načítání události");
                 const data = await response.json();
                 console.log("Event data:", data);
@@ -23,7 +23,7 @@ const Event = () => {
             }
         }
         fetchEvent();
-    }, [id]);
+    }, [publicId]);
 
     return (
         <div className="container mt-5">

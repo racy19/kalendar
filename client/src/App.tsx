@@ -22,7 +22,7 @@ function App() {
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/create-event" element={<CreateEvent />} />
-          <Route path="/event/:id" element={<Event />} />
+          <Route path="/event/:publicId" element={<Event />} />
         </Route>
       </Route>
     </Routes>

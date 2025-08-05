@@ -9,6 +9,7 @@ interface Event {
   title: string;
   description?: string;
   dates: string[];
+  publicId: string;
 }
 
 const Dashboard = () => {
@@ -71,14 +72,14 @@ const Dashboard = () => {
             const dateString = event.dates.map(date => new Date(date).toLocaleDateString());
             return (
               <li key={event._id}>
-                <strong onClick={() => navigate(`/event/${event._id}`)}>{event.title} </strong>
+                <strong onClick={() => navigate(`/event/${event.publicId}`)}>{event.title} </strong>
                 <button
                   className="btn btn-sm btn-success"
-                  onClick={() => navigate(`/event/${event._id}`)}
+                  onClick={() => navigate(`/event/${event.publicId}`)}
                 >zobrazit</button>
                 <button
                   className="btn btn-sm btn-danger"
-                  onClick={() => handleDelete(event._id)}
+                  onClick={() => handleDelete(event.publicId)}
                 >smazat</button><br />
                 {event.description && <span>{event.description}</span>}<br />
                 <p className="mt-2"><strong>{dateString.join(", ")}</strong></p>
