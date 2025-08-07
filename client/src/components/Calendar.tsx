@@ -1,11 +1,18 @@
 import { useMemo, useState } from "react";
 
-interface CalendarProps {
-    selectedDates?: Date[];
-    handleOnClick?: (date: Date) => void;
+interface Vote {
+    date: Date;
+    vote: string;
 }
 
-const Calendar = ({ selectedDates, handleOnClick }: CalendarProps) => {
+interface CalendarProps {
+    selectedDates?: Date[];
+    showCellRadios?: boolean;                 
+    handleOnClick?: (date: Date) => void;
+    onVoteChange?: (updatedVotes: Vote[]) => void;
+}
+
+const Calendar = ({ selectedDates, showCellRadios = false, handleOnClick, onVoteChange }: CalendarProps) => {
     const today = new Date();
 
     const current = {
@@ -16,6 +23,8 @@ const Calendar = ({ selectedDates, handleOnClick }: CalendarProps) => {
 
     const [yearToShow, setYearToShow] = useState(current.year);
     const [monthToShow, setMonthToShow] = useState(current.month);
+
+    const [localVotes, setLocalVotes] = useState<Vote[]>([]);
 
     const firstDayOfMonth = new Date(yearToShow, monthToShow, 1);
     const firstDayOfMonthIndex = (firstDayOfMonth.getDay() + 6) % 7;
@@ -94,6 +103,15 @@ const Calendar = ({ selectedDates, handleOnClick }: CalendarProps) => {
         return daysToShow;
     }, [yearToShow, monthToShow, daysInCurrentMonth, firstDayOfMonthIndex]);
 
+    const handleVoteChange = (date: Date, vote: string) => {
+        const updatedVotes = localVotes.filter(v => v.date.getTime() !== date.getTime());
+        if (vote) {
+            updatedVotes.push({ date, vote });
+        }
+        setLocalVotes(updatedVotes);
+        onVoteChange?.(updatedVotes);
+    };
+
     const daysMapped = calendarDayNumberArray.map((row, rowIndex) => (
         <div key={rowIndex} className="row flex-fill">
             {row.map((cell, colIndex) => {
@@ -123,6 +141,47 @@ const Calendar = ({ selectedDates, handleOnClick }: CalendarProps) => {
                         <small className="position-absolute top-0 end-0 m-1">
                             {cell.day}
                         </small>
+                        {(showCellRadios && isSelected) && (
+                            <>
+                                  <div className="form-check form-check-inline">
+                                  <input
+                                    type="radio"
+                                    id="yes"
+                                    name="odpoved"
+                                    value="yes"
+                                    className="form-check-input"
+                                    checked={localVotes.some(v => v.date.getTime() === cell.date.getTime() && v.vote === "yes")}
+                                    onChange={() => handleVoteChange(cell.date, "yes")}
+                                  />
+                                  <label htmlFor="yes" className="form-check-label">Ano</label>
+                                </div>
+                          
+                                <div className="form-check form-check-inline">
+                                  <input
+                                    type="radio"
+                                    id="no"
+                                    name="odpoved"
+                                    value="no"
+                                    className="form-check-input"
+                                    checked={localVotes.some(v => v.date.getTime() === cell.date.getTime() && v.vote === "no")}
+                                    onChange={() => handleVoteChange(cell.date, "no")}
+                                  />
+                                  <label htmlFor="no" className="form-check-label">Ne</label>
+                                </div>
+                          
+                                <div className="form-check form-check-inline">
+                                  <input
+                                    type="radio"
+                                    id="maybe"
+                                    name="odpoved"
+                                    value="maybe"
+                                    className="form-check-input"
+                                    checked={localVotes.some(v => v.date.getTime() === cell.date.getTime() && v.vote === "maybe")}
+                                    onChange={() => handleVoteChange(cell.date, "maybe")}
+                                  />
+                                  <label htmlFor="maybe" className="form-check-label">Možná</label>
+                                </div>
+                                </>)}
                     </div>
                 );
             })}

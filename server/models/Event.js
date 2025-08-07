@@ -7,13 +7,7 @@ const eventSchema = new mongoose.Schema({
     },
     description: String,
   
-    // possible dates for the event
-    dates: {
-      type: [Date],
-      required: true
-    },
-  
-    // user 
+    // creator of the event 
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -29,7 +23,31 @@ const eventSchema = new mongoose.Schema({
       type: String,
       unique: true,
       required: true
-    }
+    },
+    
+    // array of possible dates and user votes
+    options: [
+      {
+        date: {
+          type: Date,
+          required: true
+        },
+        votes: [
+          {
+            userId: {
+              type: mongoose.Schema.Types.ObjectId,
+              ref: 'User',
+              required: true
+            },
+            status: {
+              type: String,
+              enum: ['yes', 'no', 'maybe'],
+              required: true
+            }
+          }
+        ]
+      }
+    ]
   });
 
   module.exports = mongoose.model('Event', eventSchema);

@@ -5,7 +5,7 @@ const ButtonSubmit = ({
     disabled = false,
 }: {
     text: string;
-    onClick?: () => void;
+    onClick?: () => void | Promise<void>;
     className?: string;
     disabled?: boolean;
 }) => {

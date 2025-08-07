@@ -7,7 +7,12 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173', // nebo true v devu
+  methods: ['GET','POST','PATCH','PUT','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 app.use(express.json());
 
 // Testing endpoint
@@ -29,6 +34,9 @@ app.use('/api/auth', userRoutes);
 
 const eventRoutes = require('./routes/events');
 app.use('/api/events', eventRoutes);
+
+const usersRoutes = require('./routes/users');
+app.use('/api/users', usersRoutes);
 
 // Start server
 app.listen(PORT, () => {
