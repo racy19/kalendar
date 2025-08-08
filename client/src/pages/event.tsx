@@ -8,7 +8,7 @@ import ButtonSubmit from "../components/ButtonSubmit";
 interface EventOption {
     _id: string;
     date: Date;
-    votes: string[];
+    votes: any[];
 }
 
 interface Vote {
@@ -22,6 +22,7 @@ const Event = () => {
     const [eventCreator, setEventCreator] = useState<string>("");
     const [datesToVote, setDatesToVote] = useState<Date[]>([]);
     const [votes, setVotes] = useState<Vote[]>([]);
+    const [statusYesCount, setStatusYesCount] = useState<any>(null);
 
     const { id: userId } = useSelector((state: RootState) => ({
         id: state.auth.user?.id
@@ -75,6 +76,22 @@ const Event = () => {
                     setEvent(filteredData);
                     const dates = filteredData.dates.map((date: string) => new Date(date));
                     setDatesToVote(dates);
+                    console.log("filtereddata:", filteredData);
+                    const yesVotesByDate = filteredData.options.reduce(
+                        (acc: any, option: any) => {
+                          const dateKey =
+                            option.date instanceof Date
+                              ? option.date.toISOString()
+                              : new Date(option.date).toISOString();
+                      
+                          const yesCount = option.votes.filter((vote: any) => vote.status === "yes").length;
+                      
+                          acc[dateKey] = yesCount;
+                          return acc;
+                        },
+                        {}
+                      );
+                    setStatusYesCount(yesVotesByDate);
                 } catch (error) {
                     console.error("Chyba při načítání události:", error);
                 }
@@ -114,6 +131,7 @@ const Event = () => {
                     selectedDates={datesToVote}
                     onVoteChange={(updatedVotes: Vote[]) => setVotes(updatedVotes)}
                     showCellRadios={!isUserSameAsEventCreator}
+                    yesVoteCount={statusYesCount}
                 />
                 {!isUserSameAsEventCreator && (
                     <form onSubmit={handleSubmit}>

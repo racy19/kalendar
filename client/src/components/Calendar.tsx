@@ -10,9 +10,10 @@ interface CalendarProps {
     showCellRadios?: boolean;                 
     handleOnClick?: (date: Date) => void;
     onVoteChange?: (updatedVotes: Vote[]) => void;
+    yesVoteCount?: Record<string, number>;
 }
 
-const Calendar = ({ selectedDates, showCellRadios = false, handleOnClick, onVoteChange }: CalendarProps) => {
+const Calendar = ({ selectedDates, showCellRadios = false, handleOnClick, onVoteChange, yesVoteCount }: CalendarProps) => {
     const today = new Date();
 
     const current = {
@@ -182,6 +183,13 @@ const Calendar = ({ selectedDates, showCellRadios = false, handleOnClick, onVote
                                   <label htmlFor="maybe" className="form-check-label">Možná</label>
                                 </div>
                                 </>)}
+                                {(yesVoteCount && isSelected) && (
+                                <div className="position-absolute bottom-0 end-0">
+                                    <span className="badge bg-secondary">
+                                        {yesVoteCount[(cell.date).toISOString()] ?? 0} přijde
+                                    </span>
+                                    </div>
+                                )}
                     </div>
                 );
             })}
