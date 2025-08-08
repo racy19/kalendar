@@ -22,6 +22,10 @@
     padding: 0.5rem 0;
 }
 
+.callendar-cell-event {
+    background-color: #DBF9DB;
+}
+
 .calendar-body .row {
     flex: 1 1 0;
     min-height: 0;

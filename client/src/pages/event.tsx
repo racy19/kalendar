@@ -16,13 +16,19 @@ interface Vote {
     vote: string;
 }
 
+interface VoteCount {
+    yes: number;
+    no: number;
+    maybe: number;
+}
+
 const Event = () => {
     const { publicId } = useParams<{ publicId: string }>();
     const [event, setEvent] = useState<any>(null);
     const [eventCreator, setEventCreator] = useState<string>("");
     const [datesToVote, setDatesToVote] = useState<Date[]>([]);
     const [votes, setVotes] = useState<Vote[]>([]);
-    const [statusYesCount, setStatusYesCount] = useState<any>(null);
+    const [voteCountByDate, setVoteCountByDate] = useState<any>(null);
 
     const { id: userId } = useSelector((state: RootState) => ({
         id: state.auth.user?.id
@@ -60,44 +66,49 @@ const Event = () => {
         }
     }
 
-        useEffect(() => {
-            const fetchEvent = async () => {
-                if (!publicId) return;
-                try {
-                    const response = await fetch(`${import.meta.env.VITE_API_URL}/events/${publicId}`);
-                    if (!response.ok) throw new Error("Chyba při načítání události");
-                    const data = await response.json();
-                    console.log("Event data:", data);
-                    // transform data to match expected structure
-                    const filteredData = {
-                        ...data,
-                        dates: data.options.map((option: EventOption) => option.date)
-                    }
-                    setEvent(filteredData);
-                    const dates = filteredData.dates.map((date: string) => new Date(date));
-                    setDatesToVote(dates);
-                    console.log("filtereddata:", filteredData);
-                    const yesVotesByDate = filteredData.options.reduce(
-                        (acc: any, option: any) => {
-                          const dateKey =
-                            option.date instanceof Date
-                              ? option.date.toISOString()
-                              : new Date(option.date).toISOString();
-                      
-                          const yesCount = option.votes.filter((vote: any) => vote.status === "yes").length;
-                      
-                          acc[dateKey] = yesCount;
-                          return acc;
-                        },
-                        {}
-                      );
-                    setStatusYesCount(yesVotesByDate);
-                } catch (error) {
-                    console.error("Chyba při načítání události:", error);
+    useEffect(() => {
+        const fetchEvent = async () => {
+            if (!publicId) return;
+            try {
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/events/${publicId}`);
+                if (!response.ok) throw new Error("Chyba při načítání události");
+                const data = await response.json();
+                console.log("Event data:", data);
+                // transform data to match expected structure
+                const filteredData = {
+                    ...data,
+                    dates: data.options.map((option: EventOption) => option.date)
                 }
+                setEvent(filteredData);
+                const dates = filteredData.dates.map((date: string) => new Date(date));
+                setDatesToVote(dates);
+                console.log("filtereddata:", filteredData);
+                const votesByDate = filteredData.options.reduce(
+                    (acc: any, option: any) => {
+                        const dateKey =
+                            option.date instanceof Date
+                                ? option.date.toISOString()
+                                : new Date(option.date).toISOString();
+
+                        const voteCount: VoteCount = { yes: 0, no: 0, maybe: 0 };
+                        option.votes.forEach((vote: any) => {
+                            if (vote.status === "yes") voteCount.yes++;
+                            else if (vote.status === "no") voteCount.no++;
+                            else if (vote.status === "maybe") voteCount.maybe++;
+                        });
+
+                        acc[dateKey] = voteCount;
+                        return acc;
+                    },
+                    {}
+                );
+                setVoteCountByDate(votesByDate);
+            } catch (error) {
+                console.error("Chyba při načítání události:", error);
             }
-            fetchEvent();
-        }, [publicId]);
+        }
+        fetchEvent();
+    }, [publicId]);
 
     useEffect(() => {
         const fetchEventCreator = async () => {
@@ -117,31 +128,29 @@ const Event = () => {
         fetchEventCreator();
     }, [event?.user, publicId]);
 
-        const isUserSameAsEventCreator = event?.user === userId;
-        console.log('hlasovani:', votes);
+    const isUserSameAsEventCreator = event?.user === userId;
+    console.log('hlasovani:', votes);
 
-        return (
-            <div className="container mt-5">
-                <h1>{event?.title}</h1>
-                <p>{event?.description}</p>
-                {!isUserSameAsEventCreator &&
-                    <p>Událost vytvořil/a: {eventCreator}</p>}
-                <p><Link to="/dashboard">zpět</Link></p>
-                <Calendar
-                    selectedDates={datesToVote}
-                    onVoteChange={(updatedVotes: Vote[]) => setVotes(updatedVotes)}
-                    showCellRadios={!isUserSameAsEventCreator}
-                    yesVoteCount={statusYesCount}
+    return (
+        <div className="container mt-5">
+            <h1>{event?.title}</h1>
+            <p>{event?.description}</p>
+            {!isUserSameAsEventCreator &&
+                <p>Událost vytvořil/a: {eventCreator}</p>}
+            <p><Link to="/dashboard">zpět</Link></p>
+            <Calendar
+                selectedDates={datesToVote}
+                onVoteChange={(updatedVotes: Vote[]) => setVotes(updatedVotes)}
+                showCellRadios={true}
+                voteCountByDate={voteCountByDate}
+            />
+            <form onSubmit={handleSubmit}>
+                <ButtonSubmit
+                    text="Uložit moje termíny"
                 />
-                {!isUserSameAsEventCreator && (
-                    <form onSubmit={handleSubmit}>
-                        <ButtonSubmit
-                            text="Uložit moje termíny"
-                        />
-                    </form>
-                )}
-            </div>
-        );
-    }
+            </form>
+        </div>
+    );
+}
 
-    export default Event;
+export default Event;

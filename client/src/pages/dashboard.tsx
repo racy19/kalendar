@@ -115,8 +115,9 @@ const Dashboard = () => {
           }
           )}
         </ul>) : <p>Nemáte žádné události.</p>}
-      <h3 className="mt-5">Události, kde jsem hlasoval/a</h3>
         <p><Link to="/create-event">vytvořit novou událost</Link></p>
+
+      <h3 className="mt-5">Události, kde jsem hlasoval/a</h3>
       <button className="btn btn-primary mt-3" onClick={handleLogout}>odhlásit</button>
     </div>
   );
