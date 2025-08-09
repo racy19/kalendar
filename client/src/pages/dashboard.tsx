@@ -112,7 +112,7 @@ const Dashboard = () => {
   if (!user) return <p>Načítání uživatele...</p>;
 
   return (
-    <div className="container mt-5">
+    <div className="container mt-3 mt-lg-4">
       <h1>Moje události</h1>
       <p>
         Vítej {user.name && user.name}!

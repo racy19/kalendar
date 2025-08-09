@@ -72,7 +72,7 @@ const CreateEvent = () => {
 
 
     return (
-        <div className="container mt-5">
+        <div className="container mt-3 mt-lg-4">
             <h1>Vytvořit událost</h1>
             <form onSubmit={handleSubmit}>
                 <InputText

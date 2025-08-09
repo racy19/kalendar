@@ -19,12 +19,16 @@ const Event = () => {
         id: state.auth.user?.id
     }));
 
+    const isUserSameAsEventCreator = event?.user === userId;
+
     const handleDateToggle = (date: Date) => {
-        setUpdatedDates(prevDates =>
-            prevDates.includes(date)
-                ? prevDates.filter(d => d.getTime() !== date.getTime())
-                : [...prevDates, date]
-        );
+        if (isUserSameAsEventCreator) {
+            setUpdatedDates(prevDates =>
+                prevDates.includes(date)
+                    ? prevDates.filter(d => d.getTime() !== date.getTime())
+                    : [...prevDates, date]
+            );
+        }
         console.log("Updated dates:", updatedDates);
     }
 
@@ -80,6 +84,7 @@ const Event = () => {
             const data = await response.json();
             console.log("Událost aktualizována:", data);
             alert("Událost byla úspěšně aktualizována.");
+            setDatesToVote(prev => [...prev, ...updatedDates]); // update local state with new dates
         } catch (error) {
             console.error("Chyba při aktualizaci události:", error);
             alert("Došlo k chybě při aktualizaci události. Zkuste to prosím znovu.");
@@ -149,11 +154,10 @@ const Event = () => {
         fetchEventCreator();
     }, [event?.user, publicId]);
 
-    const isUserSameAsEventCreator = event?.user === userId;
     console.log('hlasovani:', votes);
 
     return (
-        <div className="container mt-5">
+        <div className="container mt-3 mt-lg-4">
             <h1>{event?.title}</h1>
             <p>{event?.description}</p>
             {!isUserSameAsEventCreator &&
