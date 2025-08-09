@@ -51,7 +51,50 @@ router.post('/', async (req, res) => {
     }
 });
 
-// get all events for a specific user
+// update an event by ID
+router.patch('/:publicId', async (req, res) => {
+    try {
+        const publicId = req.params.publicId;
+        const { title, description, dates } = req.body;
+
+        // Check if dates is an array
+        if (!Array.isArray(dates) || dates.length === 0) {
+            return res.status(400).json({ error: 'Pole dates musí obsahovat alespoň jeden termín' });
+        }
+
+        // Find the event by publicId
+        const event = await Event.findOne({ publicId: publicId });
+        if (!event) {
+            return res.status(404).json({ error: 'Událost nenalezena' });
+        }
+
+        // Update event fields
+        if (title) event.title = title;
+        if (description) event.description = description;
+
+        // Add new dates (without replacing existing options)
+        // This ensures no data loss for existing votes
+        dates.forEach(date => {
+            // Check if the date already exists in options, if not, add it
+            const existingOption = event.options.find(option => option.date.toISOString() === new Date(date).toISOString());
+            if (!existingOption) {
+                event.options.push({
+                    date: new Date(date), // Convert string to Date object
+                    votes: [] // Initialize an empty vote array for the new date
+                });
+            }
+        });
+
+        // Save the updated event
+        await event.save();
+        res.status(200).json(event);
+    } catch (err) {
+        console.error("Chyba při aktualizaci události:", err);
+        res.status(500).json({ error: 'Chyba serveru při aktualizaci události' });
+    }
+});
+
+// get all events of a given user as event creator
 router.get("/user/:userId", async (req, res) => {
     try {
         const userId = req.params.userId;
@@ -64,6 +107,24 @@ router.get("/user/:userId", async (req, res) => {
 
         res.json(events);
     } catch (err) {
+        console.error("Chyba při načítání událostí:", err);
+        res.status(500).json({ error: "Chyba serveru" });
+    }
+});
+
+// get all events where user is a participant (voted)
+router.get("/participant/:userId", async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(400).json({ error: "Neplatné userId" });
+        }
+        // find all events where userId is in votes of any option
+        const events = await Event.find({
+            "options.votes.userId": userId
+        });
+        res.json(events);
+    } catch (err) { 
         console.error("Chyba při načítání událostí:", err);
         res.status(500).json({ error: "Chyba serveru" });
     }

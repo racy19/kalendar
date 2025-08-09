@@ -26,6 +26,10 @@
     background-color: #DBF9DB;
 }
 
+.calendar-checkmark:hover {
+    cursor: pointer;
+}
+
 .calendar-body .row {
     flex: 1 1 0;
     min-height: 0;

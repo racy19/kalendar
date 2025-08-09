@@ -1,25 +1,19 @@
 import { useMemo, useState } from "react";
-
-interface Vote {
-    date: Date;
-    vote: string;
-}
-
-interface VoteCount {
-    yes: number;
-    no: number;
-    maybe: number;
-}
+import { Vote, VoteCount } from "../types/types";
+import CheckmarkYes from "./svg/CheckmarkYes";
+import CheckmarkMaybe from "./svg/CheckmarkMaybe";
+import CheckmarkNo from "./svg/CheckmarkNo";
 
 interface CalendarProps {
-    selectedDates?: Date[];
+    eventOptions?: Date[];
+    updatedEventDates?: Date[];
     showCellRadios?: boolean;
     handleOnClick?: (date: Date) => void;
     onVoteChange?: (updatedVotes: Vote[]) => void;
     voteCountByDate?: Record<string, VoteCount>;
 }
 
-const Calendar = ({ selectedDates, showCellRadios = false, handleOnClick, onVoteChange, voteCountByDate = {} }: CalendarProps) => {
+const Calendar = ({ eventOptions, showCellRadios = false, handleOnClick, onVoteChange, voteCountByDate = {}, updatedEventDates }: CalendarProps) => {
     const today = new Date();
 
     const current = {
@@ -123,13 +117,12 @@ const Calendar = ({ selectedDates, showCellRadios = false, handleOnClick, onVote
         const { yes, no, maybe } = voteCountByDate[dateKey] || { yes: 0, no: 0, maybe: 0 };
         return (
             <div className="d-flex justify-content-between">
-                <span className="badge bg-success">{yes}</span>
-                <span className="badge bg-warning">{maybe}</span>
-                <span className="badge bg-danger">{no}</span>
+                <span style={{ color: '00A000', marginRight: '.3rem', fontWeight: 'bold' }}>{yes}</span>
+                <span style={{ color: '#FFA500', marginRight: '.3rem', fontWeight: 'bold' }}>{maybe}</span>
+                <span style={{ color: '#B22222', fontWeight: 'bold' }}>{no}</span>
             </div>
         );
     }
-
 
     const daysMapped = calendarDayNumberArray.map((row, rowIndex) => (
         <div key={rowIndex} className="row flex-fill">
@@ -140,68 +133,51 @@ const Calendar = ({ selectedDates, showCellRadios = false, handleOnClick, onVote
                     monthToShow === current.month &&
                     yearToShow === current.year;
 
-                const isSelected = selectedDates?.some(
+                const isEventOption = eventOptions?.some(
+                    (d) => d.getTime() === cell.date.getTime()
+                );
+
+                const isUpdated = updatedEventDates?.some(
                     (d) => d.getTime() === cell.date.getTime()
                 );
 
                 return (
                     <div
                         key={colIndex}
-                        className={`col border position-relative text-start p-2 calendar-cell ${isSelected
+                        className={`col border position-relative text-start p-2 calendar-cell ${isEventOption
                             ? "callendar-cell-event"
-                            : isToday
-                                ? "bg-primary text-white"
-                                : cell.isCurrentMonth
-                                    ? ""
-                                    : "text-muted bg-light"
+                            : isUpdated
+                                ? "bg-success text-white"
+                                : isToday
+                                    ? "bg-primary text-white"
+                                    : cell.isCurrentMonth
+                                        ? ""
+                                        : "text-muted bg-light"
                             }`}
                         onClick={() => handleOnClick?.(cell.date)}
                     >
                         <small className="position-absolute top-0 end-0 m-1">
                             {cell.day}
                         </small>
-                        {(showCellRadios && isSelected) && (
+                        {(showCellRadios && isEventOption) && (
                             <>
-                                <div className="form-check form-check-inline">
-                                    <input
-                                        type="radio"
-                                        id="yes"
-                                        name="odpoved"
-                                        value="yes"
-                                        className="form-check-input"
-                                        checked={localVotes.some(v => v.date.getTime() === cell.date.getTime() && v.vote === "yes")}
-                                        onChange={() => handleVoteChange(cell.date, "yes")}
-                                    />
-                                    <label htmlFor="yes" className="form-check-label">Ano</label>
-                                </div>
-
-                                <div className="form-check form-check-inline">
-                                    <input
-                                        type="radio"
-                                        id="no"
-                                        name="odpoved"
-                                        value="no"
-                                        className="form-check-input"
-                                        checked={localVotes.some(v => v.date.getTime() === cell.date.getTime() && v.vote === "no")}
-                                        onChange={() => handleVoteChange(cell.date, "no")}
-                                    />
-                                    <label htmlFor="no" className="form-check-label">Ne</label>
-                                </div>
-
-                                <div className="form-check form-check-inline">
-                                    <input
-                                        type="radio"
-                                        id="maybe"
-                                        name="odpoved"
-                                        value="maybe"
-                                        className="form-check-input"
-                                        checked={localVotes.some(v => v.date.getTime() === cell.date.getTime() && v.vote === "maybe")}
-                                        onChange={() => handleVoteChange(cell.date, "maybe")}
-                                    />
-                                    <label htmlFor="maybe" className="form-check-label">Možná</label>
-                                </div>
+                                <CheckmarkYes
+                                    size={24}
+                                    onToggle={() => handleVoteChange(cell.date, "yes")}
+                                    checked={localVotes.some(v => v.date.getTime() === cell.date.getTime() && v.vote === "yes")}
+                                />
+                                <CheckmarkNo
+                                    size={24}
+                                    onToggle={() => handleVoteChange(cell.date, "no")}
+                                    checked={localVotes.some(v => v.date.getTime() === cell.date.getTime() && v.vote === "no")}
+                                />
+                                <CheckmarkMaybe
+                                    size={24}
+                                    onToggle={() => handleVoteChange(cell.date, "maybe")}
+                                    checked={localVotes.some(v => v.date.getTime() === cell.date.getTime() && v.vote === "maybe")}
+                                />
                             </>)}
-                        {(isSelected) && (
+                        {(isEventOption) && (
                             <div className="position-absolute bottom-0 end-0">
                                 {cellVotes(cell.date.toISOString())}
                             </div>
@@ -216,13 +192,13 @@ const Calendar = ({ selectedDates, showCellRadios = false, handleOnClick, onVote
         <div className="calendar-wrapper" style={{ height: "calc(100vh - 100px)" }}>
             <div className="container h-100 d-flex flex-column">
                 <h4 className="mt-3 mb-4 text-center">
-                    <button className="btn btn-primary me-2" onClick={getPrevMonth}>
+                    <button type="button" className="btn btn-primary me-2" onClick={getPrevMonth}>
                         &lt;
                     </button>
                     <span className="calendar-headline">
                         {months[monthToShow]} {yearToShow}
                     </span>
-                    <button className="btn btn-primary ms-2" onClick={getNextMonth}>
+                    <button type="button" className="btn btn-primary ms-2" onClick={getNextMonth}>
                         &gt;
                     </button>
                 </h4>

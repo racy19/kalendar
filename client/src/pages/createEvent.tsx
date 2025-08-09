@@ -88,9 +88,9 @@ const CreateEvent = () => {
                     onChange={handleChange}
                 />
                 <p className="mt-5">
-                    Vyberte datum a čas události pomocí kalendáře níže.
+                    Vyberte možná data události pomocí kalendáře níže.
                 </p>
-                <Calendar handleOnClick={handleDateToggle} selectedDates={selectedDates} />
+                <Calendar handleOnClick={handleDateToggle} eventOptions={selectedDates} />
                 {errorMessage && (
                     <div className="alert alert-danger mt-3">
                         {errorMessage}

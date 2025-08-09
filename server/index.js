@@ -6,9 +6,14 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+const environment = process.env.NODE_ENV || 'development';
+const allowedOrigins = environment === 'production'
+  ? ['https://kalendar-taupe.vercel.app'] // Production URL
+  : ['http://localhost:5173'];
+
 // Middleware
 app.use(cors({
-  origin: 'https://kalendar-taupe.vercel.app',
+  origin: allowedOrigins,
   methods: ['GET','POST','PATCH','PUT','DELETE','OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true

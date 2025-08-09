@@ -49,8 +49,6 @@ const Login = () => {
                 setErrorMessage(data.error || "Chyba při přihlášení");
                 return;
             }
-
-
             if (response.ok) {
                 console.log("Přihlášení úspěšné:", data);
                 setLoginSuccess(true);
@@ -94,7 +92,6 @@ const Login = () => {
                 setErrorMessage(data.error || "Chyba při přihlášení přes Google.");
                 return;
             }
-
             if (res.ok) {
                 dispatch(login({
                     user: {
@@ -162,7 +159,7 @@ const Login = () => {
                     <GoogleLogin
                         onSuccess={(credentialResponse) => {
                             if (credentialResponse.credential) {
-                                // Odeslat credential na backend
+                                // send credential to your backend for verification
                                 handleGoogleLogin(credentialResponse.credential);
                             }
                         }}

@@ -4,23 +4,7 @@ import Calendar from "../components/Calendar";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import ButtonSubmit from "../components/ButtonSubmit";
-
-interface EventOption {
-    _id: string;
-    date: Date;
-    votes: any[];
-}
-
-interface Vote {
-    date: Date;
-    vote: string;
-}
-
-interface VoteCount {
-    yes: number;
-    no: number;
-    maybe: number;
-}
+import { EventOption, Vote, VoteCount } from "../types/types";
 
 const Event = () => {
     const { publicId } = useParams<{ publicId: string }>();
@@ -29,10 +13,20 @@ const Event = () => {
     const [datesToVote, setDatesToVote] = useState<Date[]>([]);
     const [votes, setVotes] = useState<Vote[]>([]);
     const [voteCountByDate, setVoteCountByDate] = useState<any>(null);
+    const [updatedDates, setUpdatedDates] = useState<Date[]>([]);
 
     const { id: userId } = useSelector((state: RootState) => ({
         id: state.auth.user?.id
     }));
+
+    const handleDateToggle = (date: Date) => {
+        setUpdatedDates(prevDates =>
+            prevDates.includes(date)
+                ? prevDates.filter(d => d.getTime() !== date.getTime())
+                : [...prevDates, date]
+        );
+        console.log("Updated dates:", updatedDates);
+    }
 
     const handleSubmit = async (e?: React.FormEvent) => {
         e?.preventDefault();
@@ -63,6 +57,33 @@ const Event = () => {
         } catch (error) {
             console.error("Chyba při ukládání hlasování:", error);
             alert("Došlo k chybě při ukládání hlasování. Zkuste to prosím znovu.");
+        }
+    }
+
+    const handleUpdateEvent = async (e?: React.FormEvent) => {
+        e?.preventDefault();
+        if (updatedDates.length === 0) {
+            alert("Musíte vybrat alespoň jedno datum.");
+            return;
+        }
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/events/${publicId}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    dates: updatedDates
+                }),
+            });
+            if (!response.ok) throw new Error("Chyba při ukládání hlasování");
+            const data = await response.json();
+            console.log("Událost aktualizována:", data);
+            alert("Událost byla úspěšně aktualizována.");
+        } catch (error) {
+            console.error("Chyba při aktualizaci události:", error);
+            alert("Došlo k chybě při aktualizaci události. Zkuste to prosím znovu.");
+            return;
         }
     }
 
@@ -139,16 +160,27 @@ const Event = () => {
                 <p>Událost vytvořil/a: {eventCreator}</p>}
             <p><Link to="/dashboard">zpět</Link></p>
             <Calendar
-                selectedDates={datesToVote}
+                eventOptions={datesToVote}
+                updatedEventDates={updatedDates}
                 onVoteChange={(updatedVotes: Vote[]) => setVotes(updatedVotes)}
-                showCellRadios={true}
+                showCellRadios={!isUserSameAsEventCreator}
                 voteCountByDate={voteCountByDate}
+                handleOnClick={handleDateToggle}
             />
-            <form onSubmit={handleSubmit}>
-                <ButtonSubmit
-                    text="Uložit moje termíny"
-                />
-            </form>
+            {!isUserSameAsEventCreator ? (
+                <form onSubmit={handleSubmit}>
+                    <ButtonSubmit
+                        text="Uložit moje hlasování"
+                    />
+                </form>
+            ) : (
+                <form onSubmit={handleUpdateEvent}>
+                    <ButtonSubmit
+                        text="Aktualizovat událost"
+                    />
+                </form>
+            )
+            }
         </div>
     );
 }
