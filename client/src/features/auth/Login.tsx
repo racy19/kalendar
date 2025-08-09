@@ -62,7 +62,10 @@ const Login = () => {
                         token: data.token,
                     })
                 );
-                navigate("/dashboard");
+                const pathToRedirect = sessionStorage.getItem('redirectAfterLogin');
+                const redirectUrl = pathToRedirect?.includes('login') ? '/dashboard' : pathToRedirect || '/dashboard';
+                sessionStorage.removeItem('redirectAfterLogin');
+                navigate(redirectUrl);
             } else if (response.status === 401) {
                 console.error("Chyba při přihlášení:", data);
                 setErrorMessage("Neplatný email nebo heslo.");
@@ -101,7 +104,10 @@ const Login = () => {
                     },
                     token: data.token,
                 }));
-                navigate("/dashboard");
+                const pathToRedirect = sessionStorage.getItem('redirectAfterLogin');
+                const redirectUrl = pathToRedirect?.includes('login') ? '/dashboard' : pathToRedirect || '/dashboard';
+                sessionStorage.removeItem('redirectAfterLogin');
+                navigate(redirectUrl);
             } else {
                 console.error("Google login error:", data.error);
             }

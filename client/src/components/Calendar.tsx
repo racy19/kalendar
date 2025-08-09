@@ -116,11 +116,11 @@ const Calendar = ({ eventOptions, showCellRadios = false, handleOnClick, onVoteC
     const cellVotes = (dateKey: string) => {
         const { yes, no, maybe } = voteCountByDate[dateKey] || { yes: 0, no: 0, maybe: 0 };
         return (
-            <div className="d-flex justify-content-between">
-                <span style={{ color: '00A000', marginRight: '.3rem', fontWeight: 'bold' }}>{yes}</span>
-                <span style={{ color: '#FFA500', marginRight: '.3rem', fontWeight: 'bold' }}>{maybe}</span>
+            <>
+                <span style={{ color: '#00A000', fontWeight: 'bold' }}>{yes}</span>
                 <span style={{ color: '#B22222', fontWeight: 'bold' }}>{no}</span>
-            </div>
+                <span style={{ color: '#FFA500', fontWeight: 'bold' }}>{maybe}</span>
+            </>
         );
     }
 
@@ -144,7 +144,7 @@ const Calendar = ({ eventOptions, showCellRadios = false, handleOnClick, onVoteC
                 return (
                     <div
                         key={colIndex}
-                        className={`col border position-relative text-start p-2 calendar-cell ${isEventOption
+                        className={`col border position-relative text-start p-1 p-sm-2 calendar-cell ${isEventOption
                             ? "callendar-cell-event"
                             : isUpdated
                                 ? "bg-success text-white"
@@ -159,29 +159,33 @@ const Calendar = ({ eventOptions, showCellRadios = false, handleOnClick, onVoteC
                         <small className="position-absolute top-0 end-0 m-1">
                             {cell.day}
                         </small>
-                        {(showCellRadios && isEventOption) && (
-                            <>
-                                <CheckmarkYes
-                                    size={24}
-                                    onToggle={() => handleVoteChange(cell.date, "yes")}
-                                    checked={localVotes.some(v => v.date.getTime() === cell.date.getTime() && v.vote === "yes")}
-                                />
-                                <CheckmarkNo
-                                    size={24}
-                                    onToggle={() => handleVoteChange(cell.date, "no")}
-                                    checked={localVotes.some(v => v.date.getTime() === cell.date.getTime() && v.vote === "no")}
-                                />
-                                <CheckmarkMaybe
-                                    size={24}
-                                    onToggle={() => handleVoteChange(cell.date, "maybe")}
-                                    checked={localVotes.some(v => v.date.getTime() === cell.date.getTime() && v.vote === "maybe")}
-                                />
-                            </>)}
-                        {(isEventOption) && (
-                            <div className="position-absolute bottom-0 end-0">
-                                {cellVotes(cell.date.toISOString())}
+                        {isEventOption && (
+                            <div className="d-flex justify-content-start flex-row flex-md-column mt-3 mt-lg-0">
+                                {showCellRadios && (
+                                    <div className="d-flex justify-content-start flex-column flex-md-row">
+                                        <CheckmarkYes
+                                            size={24}
+                                            onToggle={() => handleVoteChange(cell.date, "yes")}
+                                            checked={localVotes.some(v => v.date.getTime() === cell.date.getTime() && v.vote === "yes")}
+                                        />
+                                        <CheckmarkNo
+                                            size={24}
+                                            onToggle={() => handleVoteChange(cell.date, "no")}
+                                            checked={localVotes.some(v => v.date.getTime() === cell.date.getTime() && v.vote === "no")}
+                                        />
+                                        <CheckmarkMaybe
+                                            size={24}
+                                            onToggle={() => handleVoteChange(cell.date, "maybe")}
+                                            checked={localVotes.some(v => v.date.getTime() === cell.date.getTime() && v.vote === "maybe")}
+                                        />
+                                    </div>
+                                )}
+                                <div className="d-flex justify-content-start flex-column flex-md-row gap-1 gap-md-3 ms-2">
+                                    {cellVotes(cell.date.toISOString())}
+                                </div>
                             </div>
-                        )}
+                        )
+                        }
                     </div>
                 );
             })}
@@ -189,7 +193,7 @@ const Calendar = ({ eventOptions, showCellRadios = false, handleOnClick, onVoteC
     ));
 
     return (
-        <div className="calendar-wrapper" style={{ height: "calc(100vh - 100px)" }}>
+        <div className="calendar-wrapper">
             <div className="container h-100 d-flex flex-column">
                 <h4 className="mt-3 mb-4 text-center">
                     <button type="button" className="btn btn-primary me-2" onClick={getPrevMonth}>

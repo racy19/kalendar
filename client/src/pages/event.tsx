@@ -171,12 +171,14 @@ const Event = () => {
                 <form onSubmit={handleSubmit}>
                     <ButtonSubmit
                         text="Uložit moje hlasování"
+                        className="my-3"
                     />
                 </form>
             ) : (
                 <form onSubmit={handleUpdateEvent}>
                     <ButtonSubmit
                         text="Aktualizovat událost"
+                        className="my-3"
                     />
                 </form>
             )
