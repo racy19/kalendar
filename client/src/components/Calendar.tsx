@@ -1,8 +1,10 @@
-import { useMemo, useState } from "react";
-import { Vote, VoteCount } from "../types/types";
+import { useEffect, useMemo, useState } from "react";
+import { Vote } from "../types/types";
 import CheckmarkYes from "./svg/CheckmarkYes";
 import CheckmarkMaybe from "./svg/CheckmarkMaybe";
 import CheckmarkNo from "./svg/CheckmarkNo";
+import { Tooltip } from 'react-tooltip';
+import 'react-tooltip/dist/react-tooltip.css';
 
 interface CalendarProps {
     eventOptions?: Date[];
@@ -10,10 +12,11 @@ interface CalendarProps {
     showCellRadios?: boolean;
     handleOnClick?: (date: Date) => void;
     onVoteChange?: (updatedVotes: Vote[]) => void;
-    voteCountByDate?: Record<string, VoteCount>;
+    votesByDate?: any;
+    initialVotes?: any;
 }
 
-const Calendar = ({ eventOptions, showCellRadios = false, handleOnClick, onVoteChange, voteCountByDate = {}, updatedEventDates }: CalendarProps) => {
+const Calendar = ({ eventOptions, showCellRadios = false, handleOnClick, onVoteChange, votesByDate = {}, updatedEventDates, initialVotes }: CalendarProps) => {
     const today = new Date();
 
     const current = {
@@ -22,10 +25,14 @@ const Calendar = ({ eventOptions, showCellRadios = false, handleOnClick, onVoteC
         day: today.getDate(),
     };
 
+    console.log('initial votes: ', initialVotes)
+
+
     const [yearToShow, setYearToShow] = useState(current.year);
     const [monthToShow, setMonthToShow] = useState(current.month);
 
     const [localVotes, setLocalVotes] = useState<Vote[]>([]);
+    const [initialVoteState, setInitialVoteState] = useState<any>(votesByDate);
 
     const firstDayOfMonth = new Date(yearToShow, monthToShow, 1);
     const firstDayOfMonthIndex = (firstDayOfMonth.getDay() + 6) % 7;
@@ -113,16 +120,51 @@ const Calendar = ({ eventOptions, showCellRadios = false, handleOnClick, onVoteC
         onVoteChange?.(updatedVotes);
     };
 
+    useEffect(() => {
+        if (initialVotes?.length) setInitialVoteState(initialVotes)
+    }, [initialVotes?.length])
+
     const cellVotes = (dateKey: string) => {
-        const { yes, no, maybe } = voteCountByDate[dateKey] || { yes: 0, no: 0, maybe: 0 };
+        if (!initialVotes) return;
+        if (!initialVotes[dateKey]) return;
+        const { yes, no, maybe } = initialVotes[dateKey]
+        const participantList = {
+            yes: yes.participants.join('<br>'),
+            no: no.participants.join('<br>'),
+            maybe: maybe.participants.join('<br>'),
+        }
         return (
             <>
-                <span style={{ color: '#00A000', fontWeight: 'bold' }}>{yes}</span>
-                <span style={{ color: '#B22222', fontWeight: 'bold' }}>{no}</span>
-                <span style={{ color: '#FFA500', fontWeight: 'bold' }}>{maybe}</span>
+                <span
+                    style={{ color: '#00A000', fontWeight: 'bold' }}
+                    data-tooltip-id="participants"
+                    data-tooltip-html={participantList.yes}
+                >
+                    {yes.count}
+                </span>
+                <span
+                    style={{ color: '#B22222', fontWeight: 'bold' }}
+                    data-tooltip-id="participants"
+                    data-tooltip-html={participantList.no}
+                >
+                    {no.count}
+                </span>
+                <span
+                    style={{ color: '#FFA500', fontWeight: 'bold' }}
+                    data-tooltip-id="participants"
+                    data-tooltip-html={participantList.maybe}
+                >
+                    {maybe.count}
+                </span>
+                <Tooltip
+                    id="participants"
+                    place="top"
+                    style={{ zIndex: 9999 }}
+                />
             </>
         );
     }
+    
 
     const daysMapped = calendarDayNumberArray.map((row, rowIndex) => (
         <div key={rowIndex} className="row flex-fill">

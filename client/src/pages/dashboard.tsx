@@ -15,7 +15,7 @@ interface FetchedEvent {
   title: string;
   description?: string;
   options: EventOption[];
-  user: string;
+  userId: string;
   publicId: string
 }
 
@@ -50,7 +50,6 @@ const Dashboard = () => {
       if (!res.ok) throw new Error("Mazání selhalo");
 
       // delete event from state
-      console.log("Událost s ID", eventId, "byla úspěšně smazána.");
       setEvents((prev) => prev.filter((e) => e.publicId !== eventId));
     } catch (err) {
       console.error("Chyba při mazání:", err);
@@ -66,7 +65,6 @@ const Dashboard = () => {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/events/user/${user.id}`);
         if (!response.ok) throw new Error("Chyba při načítání událostí");
         const data = await response.json();
-        console.log("Načtené události:", JSON.stringify(data));
         // return only dates of event, not user votes
         const filteredData = data.map((event: FetchedEvent) => {
           return {
@@ -89,7 +87,6 @@ const Dashboard = () => {
         const response = await fetch(`${import.meta.env.VITE_API_URL}/events/participant/${user.id}`);
         if (!response.ok) throw new Error("Chyba při načítání událostí, kde jste hlasovali");
         const data = await response.json();
-        console.log("Načtené události, kde jste hlasovali:", JSON.stringify(data));
         const filteredData = data.map((event: FetchedEvent) => {
           return {
             _id: event._id,

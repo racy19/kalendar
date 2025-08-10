@@ -39,7 +39,7 @@ router.post('/', async (req, res) => {
             title,
             description,
             options,
-            user: userId,
+            userId: userId,
             publicId
         });
 
@@ -103,7 +103,7 @@ router.get("/user/:userId", async (req, res) => {
             return res.status(400).json({ error: "Neplatné userId" });
         }
 
-        const events = await Event.find({ user: new mongoose.Types.ObjectId(userId) });
+        const events = await Event.find({ userId: new mongoose.Types.ObjectId(userId) });
 
         res.json(events);
     } catch (err) {

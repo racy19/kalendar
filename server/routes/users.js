@@ -5,15 +5,21 @@ const User = require('../models/User');
 // get user by ID
 router.get('/:id', async (req, res) => {
     try {
-        const user = await User.findById(req.params.id).select('name');
+        const { id } = req.params;
+        const user = await User.findById(id).select('-passwordHash');
         if (!user) {
             return res.status(404).json({ error: 'Uživatel nenalezen' });
         }
-        res.json(user?.name ? user.name : 'Uživatel bez jména');
+        const userObject = {
+            _id: user._id.toString(),
+            name: user.name,
+        };
+        res.json(userObject);
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Chyba při načítání uživatele' });
     }
 });
+
 
 module.exports = router;

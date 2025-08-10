@@ -41,7 +41,7 @@ const Navbar = () => {
                     <ul className="navbar-nav me-auto">
                         <li className="nav-item">
                         </li>
-                        <li className="nav-item">
+                        {/* <li className="nav-item">
                             <NavLink
                                 to="/calendar"
                                 className={({ isActive }) =>
@@ -51,7 +51,7 @@ const Navbar = () => {
                             >
                                 Kalendář
                             </NavLink>
-                        </li>
+                        </li> */}
                         <li className="nav-item">
                             <NavLink
                                 to="/create-event"

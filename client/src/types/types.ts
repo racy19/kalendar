@@ -1,6 +1,6 @@
 export type EventOption = {
     _id: string;
-    date: Date;
+    date: string;
     votes: any[];
 };
 

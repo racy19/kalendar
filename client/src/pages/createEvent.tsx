@@ -98,7 +98,7 @@ const CreateEvent = () => {
                 )}
                 <ButtonSubmit
                     text="Vytvořit událost"
-                    className="mt-3"
+                    className="my-3"
                 />
             </form>
         </div>
