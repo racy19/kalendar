@@ -32,7 +32,7 @@ const Calendar = ({ eventOptions, showCellRadios = false, handleOnClick, onVoteC
     const [monthToShow, setMonthToShow] = useState(current.month);
 
     const [localVotes, setLocalVotes] = useState<Vote[]>([]);
-    const [initialVoteState, setInitialVoteState] = useState<any>(votesByDate);
+    const [, setInitialVoteState] = useState<any>(votesByDate);
 
     const firstDayOfMonth = new Date(yearToShow, monthToShow, 1);
     const firstDayOfMonthIndex = (firstDayOfMonth.getDay() + 6) % 7;

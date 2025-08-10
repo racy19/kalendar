@@ -18,7 +18,7 @@ const Event = () => {
     const [votes, setVotes] = useState<any[]>([]);
 
     // toto asi predelam a nebude pak potreba
-    const [voteCountByDate, setVoteCountByDate] = useState<any>(null);
+    const [, setVoteCountByDate] = useState<any>(null);
 
     const [initialVotes, setInitialVotes] = useState<any>(null);
 
@@ -71,7 +71,7 @@ const Event = () => {
 
             if (!response.ok) throw new Error("Chyba při ukládání hlasování");
 
-            const data = await response.json();
+            // const data = await response.json();
 
             // toto predelat neukazuje to spravne
             // setVoteCountByDate((prev: any) => {
@@ -113,7 +113,7 @@ const Event = () => {
                 }),
             });
             if (!response.ok) throw new Error("Chyba při ukládání hlasování");
-            const data = await response.json();
+            // const data = await response.json();
             alert("Událost byla úspěšně aktualizována.");
             setDatesToVote(prev => [...prev, ...updatedDates]); // update local state with new dates
         } catch (error) {
