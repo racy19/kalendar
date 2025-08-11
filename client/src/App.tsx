@@ -3,11 +3,11 @@ import './App.css';
 import { Route, Routes } from "react-router-dom";
 import Login from "./features/auth/LoginPage";
 import ProtectedRoute from "./components/ProtectedRoute";import Calendar from "./components/Calendar";
-import CreateEvent from "./features/event/CreateEventPageTemp";
+import CreateEvent from "./features/event/CreateEventPage";
 import Layout from "./components/layout/Layout";
 import Profile from "./features/profile/ProfilePage";
 import Dashboard from "./pages/DashboardPage";
-import Event from "./features/event/EventPageTemp";
+import Event from "./features/event/EventPage";
 
 function App() {
   return (
