@@ -1,35 +1,26 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import Calendar from "../components/Calendar";
+import Calendar from "../../components/Calendar";
 import { useSelector } from "react-redux";
-import { RootState } from "../store/store";
-import ButtonSubmit from "../components/ButtonSubmit";
-import { EventOption, Vote, VoteCount } from "../types/types";
+import { RootState } from "../../store/store";
+import ButtonSubmit from "../../components/UI/ButtonSubmit";
+import { EventOption, Vote } from "../../types/types";
 
 const Event = () => {
     const { publicId } = useParams<{ publicId: string }>();
     const [event, setEvent] = useState<any>(null);
     const [eventCreator, setEventCreator] = useState<string>("");
-    
-    // calendar prop: pole datumu k hlasovani o udalosti, nacita se z be, pripadne jde aktualizovat pomoci handleUpdateEvent
-    const [datesToVote, setDatesToVote] = useState<Date[]>([]);
 
-    // objekt s vysledky hlasovani votes.date.yes.count nebo votes.date.yes.participants, yes muze byt nahrazeno no nebo maybe, participants je pole jmen hlasujicich pro danou moznost
-    const [votes, setVotes] = useState<any[]>([]);
+    const [datesToVote, setDatesToVote] = useState<Date[]>([]); // calendar prop: pole datumu k hlasovani o udalosti, nacita se z be, pripadne jde aktualizovat pomoci handleUpdateEvent
+    const [initialVotes, setInitialVotes] = useState<any[]>([]);
+    const [votes, setVotes] = useState<any[]>([]); // objekt s vysledky hlasovani votes.date.yes.count nebo votes.date.yes.participants, yes muze byt nahrazeno no nebo maybe, participants je pole jmen hlasujicich pro danou moznost
+    const [updatedDates, setUpdatedDates] = useState<Date[]>([]); // updated dates od tvurce udalosti k aktualizaci
+    const [participantIds, setParticipantIds] = useState<string[]>([]); // id vsech uzivatelu, kteri hlasovali alespon pro jeden termin
+    const [participants, setParticipants] = useState<any>(null); // objekt uzivatelu ve tvaru { _id: string, name: string }
+    const [userVoteStatus, setUserVoteStatus] = useState<any>([]); // volby aktualne prihlaseneho uzivatele
 
-    // toto asi predelam a nebude pak potreba
-    const [, setVoteCountByDate] = useState<any>(null);
-
-    const [initialVotes, setInitialVotes] = useState<any>(null);
-
-    // updated dates od tvurce udalosti k aktualizaci
-    const [updatedDates, setUpdatedDates] = useState<Date[]>([]);
-
-    // id vsech uzivatelu, kteri hlasovali alespon pro jeden termin
-    const [participantIds, setParticipantIds] = useState<string[]>([]);
-
-    // objekt uzivatelu ve tvaru { _id: string, name: string }
-    const [participants, setParticipants] = useState<any>(null);
+    const [errorMessage, setErrorMessage] = useState<string>("");
+    const [successMessage, setSuccessMessage] = useState<string>("");
 
     const { id: userId } = useSelector((state: RootState) => ({
         id: state.auth.user?.id
@@ -68,30 +59,11 @@ const Event = () => {
                     }))
                 }),
             });
-
             if (!response.ok) throw new Error("Chyba při ukládání hlasování");
-
-            // const data = await response.json();
-
-            // toto predelat neukazuje to spravne
-            // setVoteCountByDate((prev: any) => {
-            //     const updatedVoteCount = { ...prev };
-            //     votes.forEach(vote => {
-            //         const dateKey = new Date(vote.date).toISOString();
-            //         if (!updatedVoteCount[dateKey]) {
-            //             updatedVoteCount[dateKey] = { yes: 0, no: 0, maybe: 0 };
-            //         }
-            //         if (vote.vote === "yes") updatedVoteCount[dateKey].yes++;
-            //         else if (vote.vote === "no") updatedVoteCount[dateKey].no++;
-            //         else if (vote.vote === "maybe") updatedVoteCount[dateKey].maybe++;
-            //     });
-            //     return updatedVoteCount;
-            // });
-            // --------------------------------------
-            alert("Vaše hlasování bylo úspěšně uloženo.");
+            setSuccessMessage("Vaše hlasování bylo úspěšně uloženo.");
         } catch (error) {
             console.error("Chyba při ukládání hlasování:", error);
-            alert("Došlo k chybě při ukládání hlasování. Zkuste to prosím znovu.");
+            setErrorMessage("Došlo k chybě při ukládání hlasování. Zkuste to prosím znovu.")
         }
     }
 
@@ -114,7 +86,7 @@ const Event = () => {
             });
             if (!response.ok) throw new Error("Chyba při ukládání hlasování");
             // const data = await response.json();
-            alert("Událost byla úspěšně aktualizována.");
+            setSuccessMessage("Událost byla úspěšně aktualizována.")
             setDatesToVote(prev => [...prev, ...updatedDates]); // update local state with new dates
         } catch (error) {
             console.error("Chyba při aktualizaci události:", error);
@@ -155,29 +127,8 @@ const Event = () => {
                 setParticipantIds(uniqueUserIds);
 
                 // set dates to vote
-                const optionDates = options.map((option: EventOption) => new Date(option.date));
-                setDatesToVote(optionDates);
-
-                const votesByDate = options.reduce(
-                    (acc: any, option: any) => {
-                        const dateKey =
-                            option.date instanceof Date
-                                ? option.date.toISOString()
-                                : new Date(option.date).toISOString();
-
-                        const voteCount: VoteCount = { yes: 0, no: 0, maybe: 0 };
-                        option.votes.forEach((vote: any) => {
-                            if (vote.status === "yes") voteCount.yes++;
-                            else if (vote.status === "no") voteCount.no++;
-                            else if (vote.status === "maybe") voteCount.maybe++;
-                        });
-
-                        acc[dateKey] = voteCount;
-                        return acc;
-                    },
-                    {}
-                );
-                setVoteCountByDate(votesByDate);
+                const eventDates = options.map((option: EventOption) => new Date(option.date));
+                setDatesToVote(eventDates);
 
             } catch (error) {
                 console.error("Chyba při načítání události:", error);
@@ -186,10 +137,8 @@ const Event = () => {
         fetchEvent();
     }, [publicId]);
 
-    // const participants: Record<string, string> = {}
 
-    // fetch all participants user names ->
-    // {_id: name}
+    // fetch all participants user names -> {_id: name}
     useEffect(() => {
         if (participantIds.length === 0) return;
         const fetchUserNames = async () => {
@@ -240,16 +189,16 @@ const Event = () => {
         if (event && participants) {
             const options = event.options;
             // initialize event votes record
-            const eventVotes:any = {};
+            const eventVotes: any = {};
 
             options.map((option: EventOption) => {
                 const date = option.date;
 
                 // initialize event votes to specific date
-                eventVotes[date] = { 
-                    yes: { count: 0, participants: [] }, 
-                    no: { count: 0, participants: [] }, 
-                    maybe: { count: 0, participants: [] } 
+                eventVotes[date] = {
+                    yes: { count: 0, participants: [] },
+                    no: { count: 0, participants: [] },
+                    maybe: { count: 0, participants: [] }
                 };
 
                 option.votes.map((vote: any) => {
@@ -261,10 +210,13 @@ const Event = () => {
                     }
                 })
             })
-
-            setInitialVotes(eventVotes)
+            setVotes(eventVotes);
+            setInitialVotes(eventVotes);
         }
     }, [event, participants])
+
+
+    console.log(userVoteStatus)
 
     return (
         <div className="container mt-3 mt-lg-4">
@@ -274,14 +226,24 @@ const Event = () => {
                 <p>Událost vytvořil/a: {eventCreator}</p>}
             <p><Link to="/dashboard">zpět</Link></p>
             <Calendar
-                eventOptions={datesToVote}
+                eventDates={datesToVote}
                 updatedEventDates={updatedDates}
                 onVoteChange={(updatedVotes: Vote[]) => setVotes(updatedVotes)}
                 showCellRadios={!isUserSameAsEventCreator}
-                votesByDate={votes}
+                votesByDate={initialVotes}
                 handleOnClick={handleDateToggle}
-                initialVotes={initialVotes}
+                // userVoteStatus={userVoteStatus}
             />
+            {errorMessage && (
+                <div className="alert alert-danger mt-3">
+                    {errorMessage}
+                </div>
+            )}
+            {successMessage && (
+                <div className="alert alert-danger mt-3">
+                    {successMessage}
+                </div>
+            )}
             {!isUserSameAsEventCreator ? (
                 <form onSubmit={handleSubmitVotes}>
                     <ButtonSubmit

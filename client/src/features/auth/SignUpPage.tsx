@@ -1,7 +1,7 @@
 import { useState } from "react";
-import InputText from "../../components/InputText"
+import InputText from "../../components/UI/InputText"
 import { Link } from "react-router-dom";
-import ButtonSubmit from "../../components/ButtonSubmit";
+import ButtonSubmit from "../../components/UI/ButtonSubmit";
 
 const SignUp = () => {
     const [formData, setFormData] = useState({

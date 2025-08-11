@@ -1,9 +1,9 @@
 import { useState } from "react";
-import InputText from "../../components/InputText";
-import ButtonSubmit from "../../components/ButtonSubmit";
+import InputText from "../../components/UI/InputText";
+import ButtonSubmit from "../../components/UI/ButtonSubmit";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from 'react-redux';
-import { login } from '../../store/authSlice';
+import { login } from '../../store/auth/authSlice';
 import { GoogleLogin } from '@react-oauth/google';
 import { Tooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';

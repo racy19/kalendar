@@ -1,9 +1,9 @@
 import { useState } from "react";
-import ButtonSubmit from "../components/ButtonSubmit";
-import Calendar from "../components/Calendar";
-import InputText from "../components/InputText";
+import ButtonSubmit from "../../components/UI/ButtonSubmit";
+import Calendar from "../../components/Calendar";
+import InputText from "../../components/UI/InputText";
 import { useSelector } from "react-redux";
-import { RootState } from "../store/store";
+import { RootState } from "../../store/store";
 import { useNavigate } from "react-router-dom";
 
 const CreateEvent = () => {
@@ -15,6 +15,7 @@ const CreateEvent = () => {
         description: "",
     });
     const [errorMessage, setErrorMessage] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
 
     const userId = useSelector((state: RootState) => state.auth.user?.id);
 
@@ -62,7 +63,7 @@ const CreateEvent = () => {
                 setErrorMessage(data.error || "Chyba při vytváření události");
                 return;
             }
-            navigate("/dashboard");
+            setSuccessMessage("Událost byla úspěšně založena.")
         } catch (error) {
             console.error("Chyba při vytváření události:", error);
             setErrorMessage("Chyba při vytváření události");
@@ -90,10 +91,22 @@ const CreateEvent = () => {
                 <p className="mt-5">
                     Vyberte možná data události pomocí kalendáře níže.
                 </p>
-                <Calendar handleOnClick={handleDateToggle} eventOptions={selectedDates} />
+                <Calendar handleOnClick={handleDateToggle} eventDates={selectedDates} />
                 {errorMessage && (
                     <div className="alert alert-danger mt-3">
                         {errorMessage}
+                    </div>
+                )}
+                {successMessage && (
+                    <div className="alert alert-success mt-3">
+                        {successMessage}
+                        <button
+                            type="button"
+                            className="btn btn-sm btn-outline-success ms-3"
+                            onClick={() => navigate('/dashboard')}
+                        >
+                            zpět na přehled
+                        </button>
                     </div>
                 )}
                 <ButtonSubmit

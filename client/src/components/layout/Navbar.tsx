@@ -2,7 +2,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { useState } from "react";
-import { logout } from "../../store/authSlice";
+import { logout } from "../../store/auth/authSlice";
 
 const Navbar = () => {
     const [expanded, setExpanded] = useState(false);

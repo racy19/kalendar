@@ -1,22 +1,22 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Vote } from "../types/types";
-import CheckmarkYes from "./svg/CheckmarkYes";
-import CheckmarkMaybe from "./svg/CheckmarkMaybe";
-import CheckmarkNo from "./svg/CheckmarkNo";
+import CheckmarkYes from "./UI/icons/CheckmarkYes";
+import CheckmarkMaybe from "./UI/icons/CheckmarkMaybe";
+import CheckmarkNo from "./UI/icons/CheckmarkNo";
 import { Tooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
 
 interface CalendarProps {
-    eventOptions?: Date[];
+    eventDates?: Date[];
     updatedEventDates?: Date[];
     showCellRadios?: boolean;
     handleOnClick?: (date: Date) => void;
     onVoteChange?: (updatedVotes: Vote[]) => void;
     votesByDate?: any;
-    initialVotes?: any;
+    userVoteStatus?: any;
 }
 
-const Calendar = ({ eventOptions, showCellRadios = false, handleOnClick, onVoteChange, votesByDate = {}, updatedEventDates, initialVotes }: CalendarProps) => {
+const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteChange, votesByDate = {}, updatedEventDates, userVoteStatus }: CalendarProps) => {
     const today = new Date();
 
     const current = {
@@ -25,14 +25,10 @@ const Calendar = ({ eventOptions, showCellRadios = false, handleOnClick, onVoteC
         day: today.getDate(),
     };
 
-    console.log('initial votes: ', initialVotes)
-
-
     const [yearToShow, setYearToShow] = useState(current.year);
     const [monthToShow, setMonthToShow] = useState(current.month);
 
     const [localVotes, setLocalVotes] = useState<Vote[]>([]);
-    const [, setInitialVoteState] = useState<any>(votesByDate);
 
     const firstDayOfMonth = new Date(yearToShow, monthToShow, 1);
     const firstDayOfMonthIndex = (firstDayOfMonth.getDay() + 6) % 7;
@@ -111,6 +107,8 @@ const Calendar = ({ eventOptions, showCellRadios = false, handleOnClick, onVoteC
         return daysToShow;
     }, [yearToShow, monthToShow, daysInCurrentMonth, firstDayOfMonthIndex]);
 
+    console.log('pole dni kalendare: ', calendarDayNumberArray)
+
     const handleVoteChange = (date: Date, vote: string) => {
         const updatedVotes = localVotes.filter(v => v.date.getTime() !== date.getTime());
         if (vote) {
@@ -120,14 +118,15 @@ const Calendar = ({ eventOptions, showCellRadios = false, handleOnClick, onVoteC
         onVoteChange?.(updatedVotes);
     };
 
-    useEffect(() => {
-        if (initialVotes?.length) setInitialVoteState(initialVotes)
-    }, [initialVotes?.length])
+    const votesByDateSize = (Object.keys(votesByDate)).length;
+
+    console.log("votesByDate: ", votesByDate)
 
     const cellVotes = (dateKey: string) => {
-        if (!initialVotes) return;
-        if (!initialVotes[dateKey]) return;
-        const { yes, no, maybe } = initialVotes[dateKey]
+        console.log(votesByDateSize)
+        if (!votesByDateSize) return;
+        if (!votesByDate[dateKey]) return;
+        const { yes, no, maybe } = votesByDate[dateKey]
         const participantList = {
             yes: yes.participants.join('<br>'),
             no: no.participants.join('<br>'),
@@ -175,7 +174,7 @@ const Calendar = ({ eventOptions, showCellRadios = false, handleOnClick, onVoteC
                     monthToShow === current.month &&
                     yearToShow === current.year;
 
-                const isEventOption = eventOptions?.some(
+                const isEventOption = eventDates?.some(
                     (d) => d.getTime() === cell.date.getTime()
                 );
 
@@ -208,7 +207,10 @@ const Calendar = ({ eventOptions, showCellRadios = false, handleOnClick, onVoteC
                                         <CheckmarkYes
                                             size={24}
                                             onToggle={() => handleVoteChange(cell.date, "yes")}
-                                            checked={localVotes.some(v => v.date.getTime() === cell.date.getTime() && v.vote === "yes")}
+                                            checked={localVotes.some(v => v.date.getTime() === cell.date.getTime() && v.vote === "yes")
+                                                ||
+                                                (userVoteStatus && userVoteStatus.some((v: any) => v.date === cell.date.toISOString() && v.status === "yes")) 
+                                            }
                                         />
                                         <CheckmarkNo
                                             size={24}

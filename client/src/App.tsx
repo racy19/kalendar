@@ -1,14 +1,13 @@
-import SignUp from "./features/auth/SignUp";
+import SignUp from "./features/auth/SignUpPage";
 import './App.css';
 import { Route, Routes } from "react-router-dom";
-import Login from "./features/auth/Login";
-import ProtectedRoute from "./components/ProtectedRoute";
-import Dashboard from "./pages/dashboard";
-import Profile from "./features/Profile";
-import Calendar from "./components/Calendar";
-import CreateEvent from "./pages/createEvent";
-import Layout from "./pages/layout/Layout";
-import Event from "./pages/event";
+import Login from "./features/auth/LoginPage";
+import ProtectedRoute from "./components/ProtectedRoute";import Calendar from "./components/Calendar";
+import CreateEvent from "./features/event/CreateEventPageTemp";
+import Layout from "./components/layout/Layout";
+import Profile from "./features/profile/ProfilePage";
+import Dashboard from "./pages/DashboardPage";
+import Event from "./features/event/EventPageTemp";
 
 function App() {
   return (

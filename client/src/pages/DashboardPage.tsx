@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { Link, useNavigate } from "react-router-dom";
-import { logout } from "../store/authSlice";
+import { logout } from "../store/auth/authSlice";
 import { useEffect, useState } from "react";
 
 interface EventOption {
