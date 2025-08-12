@@ -4,7 +4,7 @@ import CheckmarkYes from "./UI/icons/CheckmarkYes";
 import CheckmarkMaybe from "./UI/icons/CheckmarkMaybe";
 import CheckmarkNo from "./UI/icons/CheckmarkNo";
 import 'react-tooltip/dist/react-tooltip.css';
-import { generateCalendarDays, getCurrentDate, getDaysInMonth, getNextMonth, getPrevMonth } from "../utils/dateUtils";
+import { generateCalendarDays, getCurrentDate, getNextMonth, getPrevMonth } from "../utils/dateUtils";
 import DayVotesCount from "./UI/calendarComponents/DayVotesCount";
 
 interface CalendarProps {
@@ -25,14 +25,6 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
     const [yearToShow, setYearToShow] = useState(current.year);
     const [monthToShow, setMonthToShow] = useState(current.month);
     const [localVotes, setLocalVotes] = useState<Vote[]>([]);
-
-    const firstDayOfMonth = new Date(yearToShow, monthToShow, 1);
-    const firstDayOfMonthIndex = (firstDayOfMonth.getDay() + 6) % 7;
-
-    const daysInCurrentMonth = getDaysInMonth(yearToShow, monthToShow);
-
-    const getCalRowCount = () =>
-        Math.ceil((firstDayOfMonthIndex + daysInCurrentMonth) / 7);
 
     const dayRow = ["Po", "Út", "St", "Čt", "Pá", "So", "Ne"];
     const months = [
