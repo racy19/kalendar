@@ -3,8 +3,9 @@ import { Vote } from "../types/types";
 import CheckmarkYes from "./UI/icons/CheckmarkYes";
 import CheckmarkMaybe from "./UI/icons/CheckmarkMaybe";
 import CheckmarkNo from "./UI/icons/CheckmarkNo";
-import { Tooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
+import { dateBeforeFirstOfMonth, getCurrentDate, getDaysInMonth, getNextMonth, getPrevMonth } from "../utils/dateUtils";
+import DayVotesCount from "./UI/calendarComponents/DayVotesCount";
 
 interface CalendarProps {
     eventDates?: Date[];
@@ -17,38 +18,18 @@ interface CalendarProps {
 }
 
 const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteChange, votesByDate = {}, updatedEventDates, userVoteStatus }: CalendarProps) => {
-    const today = new Date();
+    const current = getCurrentDate();
 
-    const current = {
-        year: today.getFullYear(),
-        month: today.getMonth(),
-        day: today.getDate(),
-    };
+    console.log('user vote status: ', userVoteStatus)
 
     const [yearToShow, setYearToShow] = useState(current.year);
     const [monthToShow, setMonthToShow] = useState(current.month);
-
     const [localVotes, setLocalVotes] = useState<Vote[]>([]);
 
     const firstDayOfMonth = new Date(yearToShow, monthToShow, 1);
     const firstDayOfMonthIndex = (firstDayOfMonth.getDay() + 6) % 7;
 
-    /**
-    * @param month 1 - leden, 2 - únor, ..., 12 - prosinec
-    * @description Returns the number of days in a given month of a given year.
-    * @example getDaysInMonth(2023, 2) // returns 28
-    */
-    const getDaysInMonth = (year: number, month: number): number =>
-        new Date(year, month + 1, 0).getDate();
-
     const daysInCurrentMonth = getDaysInMonth(yearToShow, monthToShow);
-
-    // return day of the month before the first day of the current month
-    const dateBeforeFirstDay = (dayCount: number) => {
-        const returnDay = new Date(yearToShow, monthToShow, 1);
-        returnDay.setDate(returnDay.getDate() - dayCount);
-        return returnDay.getDate();
-    };
 
     const getCalRowCount = () =>
         Math.ceil((firstDayOfMonthIndex + daysInCurrentMonth) / 7);
@@ -59,16 +40,14 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
         "Červenec", "Srpen", "Září", "Říjen", "Listopad", "Prosinec"
     ];
 
-    const getPrevMonth = () => {
-        const prevMonth = monthToShow === 0 ? 11 : monthToShow - 1;
-        const prevYear = monthToShow === 0 ? yearToShow - 1 : yearToShow;
+    const setPrevMonth = () => {
+        const { prevYear, prevMonth } = getPrevMonth(yearToShow, monthToShow);
         setMonthToShow(prevMonth);
         setYearToShow(prevYear);
     };
 
-    const getNextMonth = () => {
-        const nextMonth = monthToShow === 11 ? 0 : monthToShow + 1;
-        const nextYear = monthToShow === 11 ? yearToShow + 1 : yearToShow;
+    const setNextMonth = () => {
+        const { nextYear, nextMonth } = getNextMonth(yearToShow, monthToShow);
         setMonthToShow(nextMonth);
         setYearToShow(nextYear);
     };
@@ -83,7 +62,7 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
             let isCurrentMonth: boolean;
 
             if (i < firstDayOfMonthIndex) {
-                day = dateBeforeFirstDay(firstDayOfMonthIndex - i);
+                day = dateBeforeFirstOfMonth(yearToShow, monthToShow, firstDayOfMonthIndex - i);
                 date = new Date(yearToShow, monthToShow - 1, day, 12);
                 isCurrentMonth = false;
             } else if (i < firstDayOfMonthIndex + daysInCurrentMonth) {
@@ -117,53 +96,6 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
         setLocalVotes(updatedVotes);
         onVoteChange?.(updatedVotes);
     };
-
-    const votesByDateSize = (Object.keys(votesByDate)).length;
-
-    console.log("votesByDate: ", votesByDate)
-
-    const cellVotes = (dateKey: string) => {
-        console.log(votesByDateSize)
-        if (!votesByDateSize) return;
-        if (!votesByDate[dateKey]) return;
-        const { yes, no, maybe } = votesByDate[dateKey]
-        const participantList = {
-            yes: yes.participants.join('<br>'),
-            no: no.participants.join('<br>'),
-            maybe: maybe.participants.join('<br>'),
-        }
-        return (
-            <>
-                <span
-                    style={{ color: '#00A000', fontWeight: 'bold' }}
-                    data-tooltip-id="participants"
-                    data-tooltip-html={participantList.yes}
-                >
-                    {yes.count}
-                </span>
-                <span
-                    style={{ color: '#B22222', fontWeight: 'bold' }}
-                    data-tooltip-id="participants"
-                    data-tooltip-html={participantList.no}
-                >
-                    {no.count}
-                </span>
-                <span
-                    style={{ color: '#FFA500', fontWeight: 'bold' }}
-                    data-tooltip-id="participants"
-                    data-tooltip-html={participantList.maybe}
-                >
-                    {maybe.count}
-                </span>
-                <Tooltip
-                    id="participants"
-                    place="top"
-                    style={{ zIndex: 9999 }}
-                />
-            </>
-        );
-    }
-    
 
     const daysMapped = calendarDayNumberArray.map((row, rowIndex) => (
         <div key={rowIndex} className="row flex-fill">
@@ -207,25 +139,28 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
                                         <CheckmarkYes
                                             size={24}
                                             onToggle={() => handleVoteChange(cell.date, "yes")}
-                                            checked={localVotes.some(v => v.date.getTime() === cell.date.getTime() && v.vote === "yes")
-                                                ||
-                                                (userVoteStatus && userVoteStatus.some((v: any) => v.date === cell.date.toISOString() && v.status === "yes")) 
-                                            }
+                                            checked={localVotes.some(v => v.date.getTime() === cell.date.getTime() && v.vote === "yes")}
+                                            wasChecked={userVoteStatus && userVoteStatus.some((v: any) => v.date === cell.date.toISOString() && v.vote === "yes")}
                                         />
                                         <CheckmarkNo
                                             size={24}
                                             onToggle={() => handleVoteChange(cell.date, "no")}
                                             checked={localVotes.some(v => v.date.getTime() === cell.date.getTime() && v.vote === "no")}
+                                            wasChecked={userVoteStatus && userVoteStatus.some((v: any) => v.date === cell.date.toISOString() && v.vote === "no")}
                                         />
                                         <CheckmarkMaybe
                                             size={24}
                                             onToggle={() => handleVoteChange(cell.date, "maybe")}
                                             checked={localVotes.some(v => v.date.getTime() === cell.date.getTime() && v.vote === "maybe")}
+                                            wasChecked={userVoteStatus && userVoteStatus.some((v: any) => v.date === cell.date.toISOString() && v.vote === "maybe")}
                                         />
                                     </div>
                                 )}
                                 <div className="d-flex justify-content-start flex-column flex-md-row gap-1 gap-md-3 ms-2">
-                                    {cellVotes(cell.date.toISOString())}
+                                    <DayVotesCount
+                                        votesByDate={votesByDate}
+                                        day={cell.date.toISOString()}
+                                    />
                                 </div>
                             </div>
                         )
@@ -240,13 +175,13 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
         <div className="calendar-wrapper">
             <div className="container h-100 d-flex flex-column">
                 <h4 className="mt-3 mb-4 text-center">
-                    <button type="button" className="btn btn-primary me-2" onClick={getPrevMonth}>
+                    <button type="button" className="btn btn-primary me-2" onClick={setPrevMonth}>
                         &lt;
                     </button>
                     <span className="calendar-headline">
                         {months[monthToShow]} {yearToShow}
                     </span>
-                    <button type="button" className="btn btn-primary ms-2" onClick={getNextMonth}>
+                    <button type="button" className="btn btn-primary ms-2" onClick={setNextMonth}>
                         &gt;
                     </button>
                 </h4>

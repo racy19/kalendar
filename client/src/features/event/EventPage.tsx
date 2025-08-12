@@ -190,6 +190,7 @@ const Event = () => {
             const options = event.options;
             // initialize event votes record
             const eventVotes: any = {};
+            const userStatus: any = [];
 
             options.map((option: EventOption) => {
                 const date = option.date;
@@ -208,15 +209,25 @@ const Event = () => {
                         eventVotes[date][voteStatus].count++;
                         eventVotes[date][voteStatus].participants.push(participants[vote.userId]);
                     }
+
+                    // array with { date, status } for each date for logged user - to show in calendar as a previously picked status
+                    if (vote.userId === userId) {
+                        const userDateStatus = {
+                            date: date,
+                            vote: voteStatus
+                        }
+                        userStatus.push(userDateStatus);
+                    }
                 })
             })
             setVotes(eventVotes);
             setInitialVotes(eventVotes);
+            setUserVoteStatus(userStatus);
         }
     }, [event, participants])
 
 
-    console.log(userVoteStatus)
+    console.log(JSON.stringify(userVoteStatus))
 
     return (
         <div className="container mt-3 mt-lg-4">
@@ -232,7 +243,7 @@ const Event = () => {
                 showCellRadios={!isUserSameAsEventCreator}
                 votesByDate={initialVotes}
                 handleOnClick={handleDateToggle}
-                // userVoteStatus={userVoteStatus}
+                userVoteStatus={userVoteStatus}
             />
             {errorMessage && (
                 <div className="alert alert-danger mt-3">

@@ -14,3 +14,22 @@ export type VoteCount = {
     no: number;
     maybe: number;
 };
+
+export type StatusInfo = {
+    yes: {
+        count: number,
+        participants: string[]
+    },
+    no: {
+        count: number,
+        participants: string[]
+    },
+    maybe: {
+        count: number,
+        participants: string[]
+    },
+}
+
+export type VotingData = {
+    [date: string]: StatusInfo;
+};

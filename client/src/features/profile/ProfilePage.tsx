@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { RootState } from "../store/store";
-import InputText from "../components/UI/InputText";
-import ButtonSubmit from "../components/UI/ButtonSubmit";
+import InputText from "../../components/UI/InputText";
+import ButtonSubmit from "../../components/UI/ButtonSubmit";
+import { RootState } from "../../store/store";
 
 interface UserData {
     name: string;

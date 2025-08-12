@@ -1,12 +1,13 @@
 interface CheckmarkProps {
     checked?: boolean;
+    wasChecked?: boolean;
     size?: number;
     onToggle?: () => void;
 }
 
-const CheckmarkNo: React.FC<CheckmarkProps> = ({ checked = false, size = 56, onToggle }) => {
+const CheckmarkNo: React.FC<CheckmarkProps> = ({ checked = false, wasChecked = false, size = 56, onToggle }) => {
     const baseColor = "#BBBBBB";
-    const color = checked ? "#A00000" : baseColor;
+    const color = checked ? "#A00000" : wasChecked ? "#a07b79" : baseColor;
     return (
     <svg xmlns="http://www.w3.org/2000/svg" width={`${size}`} height={`${size}`} viewBox="0 0 56 56" className="calendar-checkmark" onClick={onToggle}>
         <path
