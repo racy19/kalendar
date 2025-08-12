@@ -251,7 +251,7 @@ const Event = () => {
                 </div>
             )}
             {successMessage && (
-                <div className="alert alert-danger mt-3">
+                <div className="alert alert-success mt-3">
                     {successMessage}
                 </div>
             )}

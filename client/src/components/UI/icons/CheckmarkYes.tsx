@@ -7,7 +7,8 @@ interface CheckmarkProps {
 
 const CheckmarkYes: React.FC<CheckmarkProps> = ({ checked = false, wasChecked = false, size = 56, onToggle }) => {
     const baseColor = "#BBBBBB";
-    const color = checked ? "#00A000" : wasChecked ? "#87c58b" : baseColor;
+    const pickedColor = "#777777"
+    const color = checked ? "#00A000" : wasChecked ? pickedColor : baseColor;
     return (
         <svg xmlns="http://www.w3.org/2000/svg" width={`${size}`} height={`${size}`} viewBox="0 0 56 56" className="calendar-checkmark" onClick={onToggle}>
             <path

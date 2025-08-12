@@ -1,10 +1,10 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Vote } from "../types/types";
 import CheckmarkYes from "./UI/icons/CheckmarkYes";
 import CheckmarkMaybe from "./UI/icons/CheckmarkMaybe";
 import CheckmarkNo from "./UI/icons/CheckmarkNo";
 import 'react-tooltip/dist/react-tooltip.css';
-import { dateBeforeFirstOfMonth, getCurrentDate, getDaysInMonth, getNextMonth, getPrevMonth } from "../utils/dateUtils";
+import { generateCalendarDays, getCurrentDate, getDaysInMonth, getNextMonth, getPrevMonth } from "../utils/dateUtils";
 import DayVotesCount from "./UI/calendarComponents/DayVotesCount";
 
 interface CalendarProps {
@@ -52,39 +52,7 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
         setYearToShow(nextYear);
     };
 
-    const calendarDayNumberArray = useMemo(() => {
-        const daysToShow: any[][] = [];
-        let row: any[] = [];
-
-        for (let i = 0; i < getCalRowCount() * 7; i++) {
-            let day: number;
-            let date: Date;
-            let isCurrentMonth: boolean;
-
-            if (i < firstDayOfMonthIndex) {
-                day = dateBeforeFirstOfMonth(yearToShow, monthToShow, firstDayOfMonthIndex - i);
-                date = new Date(yearToShow, monthToShow - 1, day, 12);
-                isCurrentMonth = false;
-            } else if (i < firstDayOfMonthIndex + daysInCurrentMonth) {
-                day = i - firstDayOfMonthIndex + 1;
-                date = new Date(yearToShow, monthToShow, day, 12);
-                isCurrentMonth = true;
-            } else {
-                day = i - firstDayOfMonthIndex - daysInCurrentMonth + 1;
-                date = new Date(yearToShow, monthToShow + 1, day, 12);
-                isCurrentMonth = false;
-            }
-
-            row.push({ day, date, isCurrentMonth });
-
-            if ((i + 1) % 7 === 0) {
-                daysToShow.push(row);
-                row = []; // reset row for next week
-            }
-        }
-
-        return daysToShow;
-    }, [yearToShow, monthToShow, daysInCurrentMonth, firstDayOfMonthIndex]);
+    const calendarDayNumberArray = generateCalendarDays(yearToShow, monthToShow)
 
     console.log('pole dni kalendare: ', calendarDayNumberArray)
 
@@ -97,9 +65,9 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
         onVoteChange?.(updatedVotes);
     };
 
-    const daysMapped = calendarDayNumberArray.map((row, rowIndex) => (
+    const daysMapped = calendarDayNumberArray.map((row: any, rowIndex: any) => (
         <div key={rowIndex} className="row flex-fill">
-            {row.map((cell, colIndex) => {
+            {row.map((cell: any, colIndex: any) => {
                 const isToday =
                     cell.isCurrentMonth &&
                     cell.day === current.day &&
