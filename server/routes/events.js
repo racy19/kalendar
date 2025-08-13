@@ -57,11 +57,6 @@ router.patch('/:publicId', async (req, res) => {
         const publicId = req.params.publicId;
         const { title, description, dates } = req.body;
 
-        // Check if dates is an array
-        if (!Array.isArray(dates) || dates.length === 0) {
-            return res.status(400).json({ error: 'Pole dates musí obsahovat alespoň jeden termín' });
-        }
-
         // Find the event by publicId
         const event = await Event.findOne({ publicId: publicId });
         if (!event) {

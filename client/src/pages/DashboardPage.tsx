@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store/store";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { logout } from "../store/auth/authSlice";
 import { useEffect, useState } from "react";
 
@@ -120,54 +120,77 @@ const Dashboard = () => {
         <button className="btn btn-sm btn-primary ms-2" onClick={handleLogout}>odhlásit</button>
       </p>
       <div className="border rounded bg-light p-3 mb-4">
-        <h3 className="mt-3 mb-5">Vytvořené události</h3>
-        {events.length > 0 ? (
-          <ul>
+        <h3 className="mt-3 mb-5 d-flex justify-content-between">
+          <span>Vytvořené události</span>
+          <span
+            className="btn btn-outline-success fs-6 fw-bold"
+            onClick={() => navigate(`/create-event`)}
+          >
+            +
+          </span>
+        </h3>
+        {events.length > 0 ?
+          <div className="event-card-container">
             {events.map(event => {
               // const dateString = event.dates.map(date => new Date(date).toLocaleDateString());
               return (
-                <li key={event._id} className="mb-3">
-                  <strong onClick={() => navigate(`/event/${event.publicId}`)}>{event.title} </strong>
-                  <button
-                    className="btn btn-sm btn-success"
-                    onClick={() => navigate(`/event/${event.publicId}`)}
-                  >zobrazit/upravit</button>
-                  <button
-                    className="btn btn-sm ms-2 btn-danger"
-                    onClick={() => handleDelete(event.publicId)}
-                  >smazat</button><br />
-                  {event.description && <span>{event.description}</span>}<br />
+                <div key={event._id} className="card text-dark bg-light mb-3 event-card">
+                  <div className="card-header">Datum placeholder</div>
+                  <div className="card-body">
+                    <div className="d-flex justify-content-between">
+                      <strong className="card-title" onClick={() => navigate(`/event/${event.publicId}`)}>{event.title} </strong>
+                      <span>
+                        <button
+                          className="btn btn-sm btn-success"
+                          onClick={() => navigate(`/event/${event.publicId}`)}
+                        >upravit</button>
+                        <button
+                          className="btn btn-sm ms-2 btn-danger"
+                          onClick={() => handleDelete(event.publicId)}
+                        >X</button>
+                      </span>
+                    </div>
+
+                    <br />
+                    {event.description && <span className="card-text">{event.description}</span>}<br />
+                  </div>
+
                   {/* <p className="mt-2"><strong>{dateString.join(", ")}</strong></p> */}
-                </li>
+                </div>
               )
             }
             )}
-          </ul>) : <p>Nemáte žádné události.</p>}
-        <p><Link to="/create-event">vytvořit novou událost</Link></p>
+          </div> : <p>Nemáte žádné události.</p>}
       </div>
       <div className="border rounded bg-light p-3 mb-4">
 
         <h3 className="mt-3 mb-5">Události, kde jsem hlasoval/a</h3>
-        <ul>
-          {votedEvents.length > 0 ? (
-            votedEvents.map(event => {
-              // const dateString = event.dates.map(date => new Date(date).toLocaleDateString());
+        {votedEvents.length > 0 ?
+          <div className="event-card-container">
+            {votedEvents.map(event => {
               return (
-                <li key={event._id} className="mb-3">
-                  <strong onClick={() => navigate(`/event/${event.publicId}`)}>{event.title} </strong>
-                  <button
-                    className="btn btn-sm btn-success"
-                    onClick={() => navigate(`/event/${event.publicId}`)}
-                  >zobrazit</button><br />
-                  {event.description && <span>{event.description}</span>}<br />
-                  {/* <p className="mt-2"><strong>{dateString.join(", ")}</strong></p> */}
-                </li>
-              )
-            })
-          ) : <p>Nehlasoval/a jste v žádné události.</p>}
-        </ul>
-      </div>
+                <div key={event._id} className="card text-dark bg-light mb-3 event-card">
+                  <div className="card-header">Datum placeholder</div>
+                  <div className="card-body">
+                    <div className="d-flex justify-content-between">
+                      <strong className="card-title" onClick={() => navigate(`/event/${event.publicId}`)}>{event.title} </strong>
+                      <span>
+                        <button
+                          className="btn btn-sm btn-success"
+                          onClick={() => navigate(`/event/${event.publicId}`)}
+                        >zobrazit</button>
+                      </span>
+                    </div>
 
+                    <br />
+                    {event.description && <span className="card-text">{event.description}</span>}<br />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          : <p>Nehlasoval/a jste v žádné události.</p>}
+      </div>
     </div>
   );
 };

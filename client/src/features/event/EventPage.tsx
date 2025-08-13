@@ -5,11 +5,18 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import ButtonSubmit from "../../components/UI/ButtonSubmit";
 import { EventOption, Vote } from "../../types/types";
+import InputText from "../../components/UI/InputText";
 
 const Event = () => {
     const { publicId } = useParams<{ publicId: string }>();
     const [event, setEvent] = useState<any>(null);
     const [eventCreator, setEventCreator] = useState<string>("");
+
+    // pro zmenu nazvu a popisku - jen pro autora udalosti
+    const [formData, setFormData] = useState({
+        title: "",
+        description: "",
+    });
 
     const [datesToVote, setDatesToVote] = useState<Date[]>([]); // calendar prop: pole datumu k hlasovani o udalosti, nacita se z be, pripadne jde aktualizovat pomoci handleUpdateEvent
     const [initialVotes, setInitialVotes] = useState<any[]>([]);
@@ -37,6 +44,14 @@ const Event = () => {
             );
         }
     }
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
 
     // submit user votes for the event dates (yes, no, maybe)
     const handleSubmitVotes = async (e?: React.FormEvent) => {
@@ -70,10 +85,6 @@ const Event = () => {
     // submit updated event dates (only for event creator)
     const handleUpdateEvent = async (e?: React.FormEvent) => {
         e?.preventDefault();
-        if (updatedDates.length === 0) {
-            alert("Musíte vybrat alespoň jedno datum.");
-            return;
-        }
         try {
             const response = await fetch(`${import.meta.env.VITE_API_URL}/events/${publicId}`, {
                 method: "PATCH",
@@ -81,6 +92,8 @@ const Event = () => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
+                    title: formData.title,
+                    description: formData.description,
                     dates: updatedDates
                 }),
             });
@@ -119,6 +132,12 @@ const Event = () => {
                     description,
                     options,
                     userId
+                }));
+
+                setFormData(prev => ({
+                    ...prev,
+                    title: title ?? "",
+                    description: description ?? ""
                 }));
 
                 // get all participant user Ids
@@ -227,8 +246,6 @@ const Event = () => {
     }, [event, participants])
 
 
-    console.log(JSON.stringify(userVoteStatus))
-
     return (
         <div className="container mt-3 mt-lg-4">
             <h1>{event?.title}</h1>
@@ -236,6 +253,20 @@ const Event = () => {
             {!isUserSameAsEventCreator &&
                 <p>Událost vytvořil/a: {eventCreator}</p>}
             <p><Link to="/dashboard">zpět</Link></p>
+            <InputText
+                id="title"
+                label="Nový název události"
+                required={true}
+                value={formData.title}
+                onChange={handleChange}
+            />
+            <InputText
+                id="description"
+                label="Nový popis události"
+                required={false}
+                value={formData.description}
+                onChange={handleChange}
+            />
             <Calendar
                 eventDates={datesToVote}
                 updatedEventDates={updatedDates}
