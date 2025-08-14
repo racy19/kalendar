@@ -1,3 +1,7 @@
+.full-height {
+    min-height: 100vh;
+}
+
 .login-page-container {
     max-width: 600px;
     margin: 0 auto;
@@ -10,6 +14,10 @@
 .login-form {
     border-right: 1px solid #ddd;
     flex: 1 1 350px;
+}
+
+.link:hover {
+    cursor: pointer;
 }
 
 .event-card-container {

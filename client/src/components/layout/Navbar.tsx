@@ -1,11 +1,12 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
-import { useState } from "react";
 import { logout } from "../../store/auth/authSlice";
+import CalendarIcon from "../UI/icons/CalendarIcon";
+import Plus from "../UI/icons/Plus";
+import PowerOff from "../UI/icons/PowerOff";
 
 const Navbar = () => {
-    const [expanded, setExpanded] = useState(false);
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const user = useSelector((state: RootState) => state.auth.user);
@@ -17,67 +18,40 @@ const Navbar = () => {
 
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div className="container">
-                <NavLink className="navbar-brand" to="/dashboard">
-                    Kalendář App
-                </NavLink>
+            <div className="container d-flex justify-content-between">
+                <div className="d-flex align-items-center">
+                    <NavLink className="navbar-brand me-lg-5" to="/dashboard">
+                        <CalendarIcon color="#FFF" size={40} />
+                    </NavLink>
 
-                {/* Hamburger button */}
-                <button
-                    className="navbar-toggler"
-                    type="button"
-                    onClick={() => setExpanded(!expanded)}
-                    aria-controls="navbarNav"
-                    aria-expanded={expanded}
-                    aria-label="Toggle navigation"
-                >
-                    <span className="navbar-toggler-icon"></span>
-                </button>
-
-                <div
-                    className={`collapse navbar-collapse ${expanded ? "show" : ""}`}
-                    id="navbarNav"
-                >
-                    <ul className="navbar-nav me-auto">
-                        <li className="nav-item">
-                        </li>
-                        {/* <li className="nav-item">
-                            <NavLink
-                                to="/calendar"
-                                className={({ isActive }) =>
-                                    "nav-link" + (isActive ? " active" : "")
-                                }
-                                onClick={() => setExpanded(false)}
-                            >
-                                Kalendář
-                            </NavLink>
-                        </li> */}
-                        <li className="nav-item">
-                            <NavLink
-                                to="/create-event"
-                                className={({ isActive }) =>
-                                    "nav-link" + (isActive ? " active" : "")
-                                }
-                                onClick={() => setExpanded(false)}
-                            >
-                                Vytvořit událost
-                            </NavLink>
-                        </li>
-                    </ul>
-
-                    <ul className="navbar-nav ms-auto">
-                        {user && (
-                            <li className="nav-item d-flex align-items-center text-white me-3">
-                                Přihlášen: <Link to="/profile" className="link-white">&nbsp;{user.name}</Link>
-                            </li>
-                        )}
-                        <li className="nav-item">
-                            <button className="btn btn-outline-light" onClick={handleLogout}>
-                                Odhlásit se
-                            </button>
-                        </li>
-                    </ul>
+                    <NavLink to="/create-event" className={"me-2"}>
+                        <Plus color="#FFF" size={30} />
+                    </NavLink>
+                    <span className="nav-item d-none d-lg-inline">
+                        <NavLink
+                            to="/create-event"
+                            className={({ isActive }) =>
+                                "nav-link" + (isActive ? " active" : "")
+                            }
+                        >
+                            Vytvořit událost
+                        </NavLink>
+                    </span>
                 </div>
+
+
+                <span className="navbar-nav ms-auto d-flex flex-row gap-2 align-items-center">
+                    {user && (
+                        <>
+                            <span className="nav-item">
+                                Přihlášen: <Link to="/profile" className="link-white">&nbsp;{user.name}</Link>
+                            </span>
+                        </>
+                    )}
+                    <span className="nav-item link" onClick={handleLogout}>
+                        <PowerOff color="#EEE" size={26} />
+                    </span>
+                </span>
             </div>
         </nav>
     );

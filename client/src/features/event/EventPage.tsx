@@ -248,25 +248,29 @@ const Event = () => {
 
     return (
         <div className="container mt-3 mt-lg-4">
+            <p><Link to="/dashboard">zpět</Link></p>
             <h1>{event?.title}</h1>
             <p>{event?.description}</p>
             {!isUserSameAsEventCreator &&
                 <p>Událost vytvořil/a: {eventCreator}</p>}
-            <p><Link to="/dashboard">zpět</Link></p>
-            <InputText
-                id="title"
-                label="Nový název události"
-                required={true}
-                value={formData.title}
-                onChange={handleChange}
-            />
-            <InputText
-                id="description"
-                label="Nový popis události"
-                required={false}
-                value={formData.description}
-                onChange={handleChange}
-            />
+            {isUserSameAsEventCreator &&
+                <>
+                    <InputText
+                        id="title"
+                        label="Nový název události"
+                        required={true}
+                        value={formData.title}
+                        onChange={handleChange}
+                    />
+                    <InputText
+                        id="description"
+                        label="Nový popis události"
+                        required={false}
+                        value={formData.description}
+                        onChange={handleChange}
+                    />
+                </>
+            }
             <Calendar
                 eventDates={datesToVote}
                 updatedEventDates={updatedDates}

@@ -1,9 +1,10 @@
 import { Outlet } from "react-router-dom";
 import Navbar from "./Navbar";
+import Footer from "./Footer";
 
 const Layout = () => {
     return (
-        <div>
+        <div className="d-flex flex-column full-height">
             <header className="bg-dark text-white p-2">
                 <Navbar />
             </header>
@@ -11,6 +12,7 @@ const Layout = () => {
             <main>
                 <Outlet />
             </main>
+            <Footer />
         </div>
     );
 };

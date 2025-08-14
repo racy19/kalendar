@@ -1,8 +1,11 @@
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { useNavigate } from "react-router-dom";
-import { logout } from "../store/auth/authSlice";
 import { useEffect, useState } from "react";
+import Plus from "../components/UI/icons/Plus";
+import Pen from "../components/UI/icons/Pen";
+import X from "../components/UI/icons/X";
+import CalendarIcon from "../components/UI/icons/CalendarIcon";
 
 interface EventOption {
   _id: string;
@@ -28,18 +31,12 @@ interface Event {
 }
 
 const Dashboard = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const user = useSelector((state: RootState) => state.auth.user);
 
   const [events, setEvents] = useState<Event[]>([]);
   const [votedEvents, setVotedEvents] = useState<Event[]>([]);
-
-  const handleLogout = () => {
-    dispatch(logout());
-    navigate("/login");
-  };
 
   const handleDelete = async (eventId: string) => {
     try {
@@ -55,6 +52,19 @@ const Dashboard = () => {
       console.error("Chyba při mazání:", err);
     }
   };
+
+  const getMinMaxDate = (dateArray: string[]) => {
+    if (!dateArray.length) {
+      return { min: null, max: null };
+    }
+
+    const dates = dateArray.map(d => new Date(d));
+
+    const minDate = new Date(Math.min(...dates.map(d => d.getTime())));
+    const maxDate = new Date(Math.max(...dates.map(d => d.getTime())));
+
+    return { min: minDate.toLocaleDateString(), max: maxDate.toLocaleDateString() };
+  }
 
   useEffect(() => {
     if (!user?.id) return;
@@ -75,6 +85,7 @@ const Dashboard = () => {
             publicId: event.publicId,
           };
         });
+        console.log(filteredData)
         setEvents(filteredData);
       } catch (error) {
         console.error("Chyba při načítání událostí:", error);
@@ -110,24 +121,17 @@ const Dashboard = () => {
 
   return (
     <div className="container mt-3 mt-lg-4">
-      <h1>Moje události</h1>
-      <p>
-        Vítej {user.name && user.name}!
-        <button
-          className="btn btn-sm btn-outline-primary ms-2"
-          onClick={() => navigate(`/profile`)}
-        >upravit profil</button>
-        <button className="btn btn-sm btn-primary ms-2" onClick={handleLogout}>odhlásit</button>
-      </p>
+      <h1 className="mb-4">Moje události</h1>
       <div className="border rounded bg-light p-3 mb-4">
         <h3 className="mt-3 mb-5 d-flex justify-content-between">
           <span>Vytvořené události</span>
-          <span
-            className="btn btn-outline-success fs-6 fw-bold"
-            onClick={() => navigate(`/create-event`)}
-          >
-            +
+          <span className="link" onClick={() => navigate(`/create-event`)}>
+            <Plus
+              size={46}
+              color="#198754"
+            />
           </span>
+
         </h3>
         {events.length > 0 ?
           <div className="event-card-container">
@@ -135,24 +139,25 @@ const Dashboard = () => {
               // const dateString = event.dates.map(date => new Date(date).toLocaleDateString());
               return (
                 <div key={event._id} className="card text-dark bg-light mb-3 event-card">
-                  <div className="card-header">Datum placeholder</div>
+                  <div className="card-header d-flex align-items-center gap-2">
+                    <CalendarIcon size={20} color="#777" /><span>{event?.dates?.length && `${getMinMaxDate(event.dates)?.min} - ${getMinMaxDate(event.dates)?.max}`}</span>
+                  </div>
                   <div className="card-body">
-                    <div className="d-flex justify-content-between">
+                    <div className="d-flex justify-content-between mb-3">
                       <strong className="card-title" onClick={() => navigate(`/event/${event.publicId}`)}>{event.title} </strong>
-                      <span>
-                        <button
-                          className="btn btn-sm btn-success"
+                      <span className="d-flex">
+                        <span
+                          className="link"
                           onClick={() => navigate(`/event/${event.publicId}`)}
-                        >upravit</button>
-                        <button
-                          className="btn btn-sm ms-2 btn-danger"
+                        ><Pen size={36} color="#198754" /></span>
+                        <span
+                          className="link"
+                          style={{ marginTop: "2px" }}
                           onClick={() => handleDelete(event.publicId)}
-                        >X</button>
+                        ><X size={36} color="#dc3545" /></span>
                       </span>
                     </div>
-
-                    <br />
-                    {event.description && <span className="card-text">{event.description}</span>}<br />
+                    {event.description && <span className="card-text mt-2">{event.description}</span>}<br />
                   </div>
 
                   {/* <p className="mt-2"><strong>{dateString.join(", ")}</strong></p> */}
@@ -170,19 +175,19 @@ const Dashboard = () => {
             {votedEvents.map(event => {
               return (
                 <div key={event._id} className="card text-dark bg-light mb-3 event-card">
-                  <div className="card-header">Datum placeholder</div>
+                  <div className="card-header d-flex align-items-center gap-2"><CalendarIcon size={20} color="#777" />
+                    <span>{event?.dates?.length && `${getMinMaxDate(event.dates)?.min} - ${getMinMaxDate(event.dates)?.max}`}</span>
+                  </div>
                   <div className="card-body">
-                    <div className="d-flex justify-content-between">
+                    <div className="d-flex justify-content-between mb-3">
                       <strong className="card-title" onClick={() => navigate(`/event/${event.publicId}`)}>{event.title} </strong>
                       <span>
-                        <button
-                          className="btn btn-sm btn-success"
+                        <span
+                          className="link"
                           onClick={() => navigate(`/event/${event.publicId}`)}
-                        >zobrazit</button>
+                        ><CalendarIcon size={30} color="#0d6efd" /></span>
                       </span>
                     </div>
-
-                    <br />
                     {event.description && <span className="card-text">{event.description}</span>}<br />
                   </div>
                 </div>
