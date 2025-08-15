@@ -1,3 +1,5 @@
+import { Vote } from "../types/types";
+
 /**
  * @description return current year, month, day
  * @example const currentDate = getCurrentDate();
@@ -10,6 +12,13 @@ export const getCurrentDate = () => {
         month: today.getMonth(),
         day: today.getDate(),
     };
+}
+
+export const isDateToday = (date: Date): boolean => {
+    const today = new Date();
+    return date.getFullYear() === today.getFullYear() &&
+        date.getMonth() === today.getMonth() &&
+        date.getDate() === today.getDate();
 }
 
 /**
@@ -48,7 +57,20 @@ export const getNextMonth = (year: number, month: number) => {
     return { nextYear, nextMonth }
 }
 
-type CalendarDay = { day: number; date: Date; isCurrentMonth: boolean };
+type CalendarDay = { day: number; date: string; isCurrentMonth: boolean };
+
+export const getDateString = (date: Date): string => {
+    return date.toISOString().split('T')[0] ?? ""; // returns date in YYYY-MM-DD format
+}
+
+export const getCZDateString = (date: Date): string => {
+    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit' };
+    return date.toLocaleDateString('cs-CZ', options).replace(/\./g, '-'); // returns date in DD-MM-YYYY format
+}
+
+export const getDateFromString = (dateString: string): Date => {
+    return new Date(dateString); // converts YYYY-MM-DD string to Date object
+}
 
 export const generateCalendarDays = (year: number, month: number): CalendarDay[][] => {
     const firstDayOfMonth = new Date(year, month, 1);
@@ -63,22 +85,25 @@ export const generateCalendarDays = (year: number, month: number): CalendarDay[]
 
     for (let i = 0; i < getCalRowCount() * 7; i++) {
         let day: number;
-        let date: Date;
+        let dateD: Date;
         let isCurrentMonth: boolean;
 
         if (i < firstDayOfMonthIndex) {
             day = dateBeforeFirstOfMonth(year, month, firstDayOfMonthIndex - i);
-            date = new Date(year, month - 1, day, 12);
+            dateD = new Date(year, month - 1, day, 12);
             isCurrentMonth = false;
         } else if (i < firstDayOfMonthIndex + daysInCurrentMonth) {
             day = i - firstDayOfMonthIndex + 1;
-            date = new Date(year, month, day, 12);
+            dateD = new Date(year, month, day, 12);
             isCurrentMonth = true;
         } else {
             day = i - firstDayOfMonthIndex - daysInCurrentMonth + 1;
-            date = new Date(year, month + 1, day, 12);
+            dateD = new Date(year, month + 1, day, 12);
             isCurrentMonth = false;
         }
+
+        // Format date to YYYY-MM-DD
+        let date = getDateString(dateD);
 
         row.push({ day, date, isCurrentMonth });
 
@@ -90,3 +115,19 @@ export const generateCalendarDays = (year: number, month: number): CalendarDay[]
 
     return daysToShow;
 };
+
+export const isDateInSelected = (date: string, selectedDates: string[]): boolean => {
+    return selectedDates.some(selectedDate => selectedDate === date);
+}
+
+/**
+ * @description checks if date is in array of dates and if status matches
+ * @param date Date to check
+ * @param status Status to check for (e.g., "yes", "no", "maybe")
+ * @param votedArray Array of votes to check against [{ date: Date, vote: string }]
+ * @returns boolean indicating if the date and status match any entry in the array
+ */
+export const isDateAndStatusInVotes = (date: string, status: string, voteArray: Vote[]): boolean => {
+    if (voteArray.length) return voteArray.some(vote => vote.date === date && vote.status === status);
+    return false;
+}

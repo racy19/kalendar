@@ -1,8 +1,8 @@
 import { Tooltip } from "react-tooltip";
-import { VotingData } from "../../../types/types";
+import { VoteRecord } from "../../../types/types";
 
 export type DayVotesCountProps = {
-    votesByDate: VotingData;
+    votesByDate: VoteRecord;
     day: string;
 }
 

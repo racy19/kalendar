@@ -31,7 +31,7 @@ router.post('/', async (req, res) => {
 
         // map obtained dates to array of options, option get automatically mongo ObjectId
         const options = dates.map(date => ({
-            date: new Date(date), // convert to Date object
+            date: date,
             votes: []
         }));
 
@@ -71,10 +71,10 @@ router.patch('/:publicId', async (req, res) => {
         // This ensures no data loss for existing votes
         dates.forEach(date => {
             // Check if the date already exists in options, if not, add it
-            const existingOption = event.options.find(option => option.date.toISOString() === new Date(date).toISOString());
+            const existingOption = event.options.find(option => option.date === date);
             if (!existingOption) {
                 event.options.push({
-                    date: new Date(date), // Convert string to Date object
+                    date: date,
                     votes: [] // Initialize an empty vote array for the new date
                 });
             }
@@ -179,7 +179,7 @@ router.patch("/:publicId/vote", async (req, res) => {
             }
             // find the option by date
             const option = event.options.find(opt =>
-                new Date(opt.date).toISOString().split("T")[0] === new Date(date).toISOString().split("T")[0]
+                opt.date === date
               );
             if (!option) {
                 continue; // skip non-existing dates

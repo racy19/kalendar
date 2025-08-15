@@ -6,6 +6,9 @@ import { RootState } from "../../store/store";
 import ButtonSubmit from "../../components/UI/ButtonSubmit";
 import { EventOption, Vote } from "../../types/types";
 import InputText from "../../components/UI/InputText";
+import { getDateString } from "../../utils/dateUtils";
+import { toggleDate } from "../../utils/calendarUtils";
+import { getEvent, getUser, getUsers, submitVotes, updateEvent } from "../../services/events";
 
 const Event = () => {
     const { publicId } = useParams<{ publicId: string }>();
@@ -18,10 +21,10 @@ const Event = () => {
         description: "",
     });
 
-    const [datesToVote, setDatesToVote] = useState<Date[]>([]); // calendar prop: pole datumu k hlasovani o udalosti, nacita se z be, pripadne jde aktualizovat pomoci handleUpdateEvent
+    const [datesToVote, setDatesToVote] = useState<string[]>([]); // calendar prop: pole datumu k hlasovani o udalosti, nacita se z be, pripadne jde aktualizovat pomoci handleUpdateEvent
     const [initialVotes, setInitialVotes] = useState<any[]>([]);
-    const [votes, setVotes] = useState<any[]>([]); // objekt s vysledky hlasovani votes.date.yes.count nebo votes.date.yes.participants, yes muze byt nahrazeno no nebo maybe, participants je pole jmen hlasujicich pro danou moznost
-    const [updatedDates, setUpdatedDates] = useState<Date[]>([]); // updated dates od tvurce udalosti k aktualizaci
+    const [votes, setVotes] = useState<Vote[]>([]); // objekt s vysledky hlasovani votes.date.yes.count nebo votes.date.yes.participants, yes muze byt nahrazeno no nebo maybe, participants je pole jmen hlasujicich pro danou moznost
+    const [updatedDates, setUpdatedDates] = useState<string[]>([]); // updated dates od tvurce udalosti k aktualizaci
     const [participantIds, setParticipantIds] = useState<string[]>([]); // id vsech uzivatelu, kteri hlasovali alespon pro jeden termin
     const [participants, setParticipants] = useState<any>(null); // objekt uzivatelu ve tvaru { _id: string, name: string }
     const [userVoteStatus, setUserVoteStatus] = useState<any>([]); // volby aktualne prihlaseneho uzivatele
@@ -35,17 +38,12 @@ const Event = () => {
 
     const isUserSameAsEventCreator = event?.userId === userId;
 
-    const handleDateToggle = (date: Date) => {
-        if (isUserSameAsEventCreator) {
-            setUpdatedDates(prevDates =>
-                prevDates.includes(date)
-                    ? prevDates.filter(d => d.getTime() !== date.getTime())
-                    : [...prevDates, date]
-            );
-        }
-    }
+    const handleDateToggle = (date: string) => {
+        if (!isUserSameAsEventCreator) return;
+        setUpdatedDates(prev => toggleDate(prev, date));
+    };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChangeText = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
@@ -61,144 +59,115 @@ const Event = () => {
             return;
         }
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/events/${publicId}/vote`, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    userId: userId,
-                    votes: votes.map(vote => ({
-                        date: vote.date,
-                        status: vote.vote
-                    }))
-                }),
-            });
-            if (!response.ok) throw new Error("Chyba při ukládání hlasování");
+            await submitVotes(publicId ?? "", userId ?? "", votes);
             setSuccessMessage("Vaše hlasování bylo úspěšně uloženo.");
         } catch (error) {
-            console.error("Chyba při ukládání hlasování:", error);
-            setErrorMessage("Došlo k chybě při ukládání hlasování. Zkuste to prosím znovu.")
+            console.error(error);
+            setErrorMessage("Došlo k chybě při ukládání hlasování. Zkuste to prosím znovu.");
         }
-    }
+    };
 
     // submit updated event dates (only for event creator)
     const handleUpdateEvent = async (e?: React.FormEvent) => {
         e?.preventDefault();
-        try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/events/${publicId}`, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    title: formData.title,
-                    description: formData.description,
-                    dates: updatedDates
-                }),
-            });
-            if (!response.ok) throw new Error("Chyba při ukládání hlasování");
-            // const data = await response.json();
-            setSuccessMessage("Událost byla úspěšně aktualizována.")
-            setDatesToVote(prev => [...prev, ...updatedDates]); // update local state with new dates
-        } catch (error) {
-            console.error("Chyba při aktualizaci události:", error);
-            alert("Došlo k chybě při aktualizaci události. Zkuste to prosím znovu.");
+
+        if (!formData.title?.trim()) {
+            setErrorMessage("Název události je povinný.");
             return;
         }
-    }
+
+        try {
+            await updateEvent(publicId ?? "", {
+                title: formData.title.trim(),
+                description: formData.description?.trim() || "",
+                dates: updatedDates,
+            });
+
+            setSuccessMessage("Událost byla úspěšně aktualizována.");
+
+            // Sloučí nové datumy bez duplicit
+            setDatesToVote(prev => Array.from(new Set([...prev, ...updatedDates])));
+
+            // volitelné: vyčistit “rozpracované” změny
+            // setUpdatedDates([]);
+        } catch (error) {
+            console.error("Chyba při aktualizaci události:", error);
+            setErrorMessage("Došlo k chybě při aktualizaci události. Zkuste to prosím znovu.");
+        }
+    };
+
 
     // fetch event
     useEffect(() => {
         const fetchEvent = async () => {
             if (!publicId) return;
+
             try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/events/${publicId}`);
-                if (!response.ok)
-                    throw new Error("Chyba při načítání události");
-                const data = await response.json();
+                const { title, description, options, userId } = await getEvent(publicId);
 
-                // destructure only the necessary fields from the db
-                const {
-                    title,
-                    description,
-                    options, // [ { date: Date, votes: [{ userId: string, status: string}] } ]
-                    userId // creator ID
-                } = data;
-
-                setEvent((prev: any) => ({
-                    ...prev,
-                    title,
-                    description,
-                    options,
-                    userId
-                }));
+                setEvent((prev: any) => ({ ...prev, title, description, options, userId }));
 
                 setFormData(prev => ({
                     ...prev,
                     title: title ?? "",
-                    description: description ?? ""
+                    description: description ?? "",
                 }));
 
-                // get all participant user Ids
-                const userIds: string = options.flatMap((option: EventOption) => option.votes.map((vote: any) => vote.userId));
-                const uniqueUserIds = [...new Set(userIds)];
+                const uniqueUserIds = Array.from(
+                    new Set(options.flatMap(opt => opt.votes.map(v => v.userId)))
+                );
                 setParticipantIds(uniqueUserIds);
 
-                // set dates to vote
-                const eventDates = options.map((option: EventOption) => new Date(option.date));
+                const eventDates = options.map(opt => getDateString(new Date(opt.date)));
                 setDatesToVote(eventDates);
 
             } catch (error) {
                 console.error("Chyba při načítání události:", error);
             }
-        }
+        };
+
         fetchEvent();
     }, [publicId]);
 
 
     // fetch all participants user names -> {_id: name}
     useEffect(() => {
-        if (participantIds.length === 0) return;
+        if (!participantIds.length) return;
+
         const fetchUserNames = async () => {
             try {
-                const responses = await Promise.all(participantIds.map(id =>
-                    fetch(`${import.meta.env.VITE_API_URL}/users/${id}`)
-                ));
-                const usersData = await Promise.all(responses.map(res => res.json()));
-                const participantsRecord: any = {}
-                usersData.map((user: any) => {
+                const usersData = await getUsers(participantIds);
+
+                const participantsRecord: Record<string, string> = {};
+                usersData.forEach(user => {
                     participantsRecord[user._id] = user.name || "Neznámý uživatel";
                 });
-                setParticipants(participantsRecord)
+
+                setParticipants(participantsRecord);
             } catch (error) {
                 console.error("Chyba při načítání uživatelů:", error);
             }
-        }
-        fetchUserNames();
+        };
 
-    }, [participantIds?.length]);
+        fetchUserNames();
+    }, [participantIds.length]);
 
     // fetch creator user name
     useEffect(() => {
-        const fetchEventCreator = async () => {
-            if (!publicId) return;
-            const creatorId = event?.userId;
-            if (!creatorId) return;
-            try {
-                // this fetch returns only user name, prevent fetching private data
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/users/${creatorId}`);
-                if (!response.ok)
-                    throw new Error("Chyba při načítání tvůrce události");
-                const data = await response.json();
+        const creatorId = event?.userId;
+        if (!publicId || !creatorId) return;
 
-                setEventCreator(data.name);
+        const fetchEventCreator = async () => {
+            try {
+                const user = await getUser(creatorId); // vrací jen jméno (podle tvého API)
+                setEventCreator(user.name || "Neznámý uživatel");
             } catch (error) {
-                console.error("Chyba při tvůrce události:", error);
+                console.error("Chyba při načítání tvůrce události:", error);
             }
-        }
+        };
+
         fetchEventCreator();
-    }, [event]);
+    }, [publicId, event?.userId]);
 
     // load vote information
     // - initialVotes object key = date
@@ -233,7 +202,7 @@ const Event = () => {
                     if (vote.userId === userId) {
                         const userDateStatus = {
                             date: date,
-                            vote: voteStatus
+                            status: voteStatus
                         }
                         userStatus.push(userDateStatus);
                     }
@@ -260,14 +229,14 @@ const Event = () => {
                         label="Nový název události"
                         required={true}
                         value={formData.title}
-                        onChange={handleChange}
+                        onChange={handleChangeText}
                     />
                     <InputText
                         id="description"
                         label="Nový popis události"
                         required={false}
                         value={formData.description}
-                        onChange={handleChange}
+                        onChange={handleChangeText}
                     />
                 </>
             }

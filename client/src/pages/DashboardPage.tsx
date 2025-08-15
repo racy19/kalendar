@@ -123,11 +123,11 @@ const Dashboard = () => {
     <div className="container mt-3 mt-lg-4">
       <h1 className="mb-4">Moje události</h1>
       <div className="border rounded bg-light p-3 mb-4">
-        <h3 className="mt-3 mb-5 d-flex justify-content-between">
+        <h3 className="mt-1 mb-4 d-flex justify-content-between">
           <span>Vytvořené události</span>
           <span className="link" onClick={() => navigate(`/create-event`)}>
             <Plus
-              size={46}
+              size={36}
               color="#198754"
             />
           </span>
@@ -149,12 +149,12 @@ const Dashboard = () => {
                         <span
                           className="link"
                           onClick={() => navigate(`/event/${event.publicId}`)}
-                        ><Pen size={36} color="#198754" /></span>
+                        ><Pen size={24} color="#198754" /></span>
                         <span
                           className="link"
-                          style={{ marginTop: "2px" }}
+                          style={{ marginTop: "1px" }}
                           onClick={() => handleDelete(event.publicId)}
-                        ><X size={36} color="#dc3545" /></span>
+                        ><X size={24} color="#dc3545" /></span>
                       </span>
                     </div>
                     {event.description && <span className="card-text mt-2">{event.description}</span>}<br />
@@ -169,7 +169,7 @@ const Dashboard = () => {
       </div>
       <div className="border rounded bg-light p-3 mb-4">
 
-        <h3 className="mt-3 mb-5">Události, kde jsem hlasoval/a</h3>
+        <h3 className="mt-1 mb-4">Události, kde jsem hlasoval/a</h3>
         {votedEvents.length > 0 ?
           <div className="event-card-container">
             {votedEvents.map(event => {
@@ -185,7 +185,7 @@ const Dashboard = () => {
                         <span
                           className="link"
                           onClick={() => navigate(`/event/${event.publicId}`)}
-                        ><CalendarIcon size={30} color="#0d6efd" /></span>
+                        ><CalendarIcon size={24} color="#0d6efd" /></span>
                       </span>
                     </div>
                     {event.description && <span className="card-text">{event.description}</span>}<br />

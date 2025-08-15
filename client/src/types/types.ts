@@ -5,17 +5,17 @@ export type EventOption = {
 };
 
 export type Vote = {
-    date: Date;
-    vote: string;
+    date: string;
+    status: string;
 };
 
-export type VoteCount = {
+export type StatusCount = {
     yes: number;
     no: number;
     maybe: number;
 };
 
-export type StatusInfo = {
+export type StatusRecord = {
     yes: {
         count: number,
         participants: string[]
@@ -30,6 +30,6 @@ export type StatusInfo = {
     },
 }
 
-export type VotingData = {
-    [date: string]: StatusInfo;
+export type VoteRecord = {
+    [date: string]: StatusRecord;
 };

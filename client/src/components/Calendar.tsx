@@ -1,26 +1,28 @@
-import { useState } from "react";
+import { Key, useState } from "react";
 import { Vote } from "../types/types";
 import CheckmarkYes from "./UI/icons/CheckmarkYes";
 import CheckmarkMaybe from "./UI/icons/CheckmarkMaybe";
 import CheckmarkNo from "./UI/icons/CheckmarkNo";
 import 'react-tooltip/dist/react-tooltip.css';
-import { generateCalendarDays, getCurrentDate, getNextMonth, getPrevMonth } from "../utils/dateUtils";
+import { generateCalendarDays, getCurrentDate, getNextMonth, getPrevMonth, isDateAndStatusInVotes, isDateInSelected, isDateToday } from "../utils/dateUtils";
 import DayVotesCount from "./UI/calendarComponents/DayVotesCount";
 
 interface CalendarProps {
-    eventDates?: Date[];
-    updatedEventDates?: Date[];
+    eventDates?: string[];
+    updatedEventDates?: string[];
     showCellRadios?: boolean;
-    handleOnClick?: (date: Date) => void;
+    handleOnClick?: (date: string) => void;
     onVoteChange?: (updatedVotes: Vote[]) => void;
     votesByDate?: any;
-    userVoteStatus?: any;
+    userVoteStatus?: Vote[];
 }
+
+type CalendarDay = { day: number; date: string; isCurrentMonth: boolean };
+
+type CalendarRow = CalendarDay[];
 
 const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteChange, votesByDate = {}, updatedEventDates, userVoteStatus }: CalendarProps) => {
     const current = getCurrentDate();
-
-    console.log('user vote status: ', userVoteStatus)
 
     const [yearToShow, setYearToShow] = useState(current.year);
     const [monthToShow, setMonthToShow] = useState(current.month);
@@ -46,33 +48,23 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
 
     const calendarDayNumberArray = generateCalendarDays(yearToShow, monthToShow)
 
-    console.log('pole dni kalendare: ', calendarDayNumberArray)
-
-    const handleVoteChange = (date: Date, vote: string) => {
-        const updatedVotes = localVotes.filter(v => v.date.getTime() !== date.getTime());
-        if (vote) {
-            updatedVotes.push({ date, vote });
+    const handleVoteChange = (date: string, status: string) => {
+        const updatedVotes = localVotes.filter(v => v.date !== date);
+        if (status) {
+            updatedVotes.push({ date, status });
         }
         setLocalVotes(updatedVotes);
         onVoteChange?.(updatedVotes);
     };
 
-    const daysMapped = calendarDayNumberArray.map((row: any, rowIndex: any) => (
+    const daysMapped = calendarDayNumberArray.map((row: CalendarRow, rowIndex: Key) => (
         <div key={rowIndex} className="row flex-fill">
-            {row.map((cell: any, colIndex: any) => {
-                const isToday =
-                    cell.isCurrentMonth &&
-                    cell.day === current.day &&
-                    monthToShow === current.month &&
-                    yearToShow === current.year;
+            {row.map((cell: CalendarDay, colIndex: Key) => {
+                const cellDate = new Date(yearToShow, monthToShow, cell.day);
+                const isToday = isDateToday(cellDate);
 
-                const isEventOption = eventDates?.some(
-                    (d) => d.getTime() === cell.date.getTime()
-                );
-
-                const isUpdated = updatedEventDates?.some(
-                    (d) => d.getTime() === cell.date.getTime()
-                );
+                const isEventOption = isDateInSelected(cell.date, eventDates || []);
+                const isUpdated = isDateInSelected(cell.date, updatedEventDates || []);
 
                 return (
                     <div
@@ -99,27 +91,27 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
                                         <CheckmarkYes
                                             size={24}
                                             onToggle={() => handleVoteChange(cell.date, "yes")}
-                                            checked={localVotes.some(v => v.date.getTime() === cell.date.getTime() && v.vote === "yes")}
-                                            wasChecked={userVoteStatus && userVoteStatus.some((v: any) => v.date === cell.date.toISOString() && v.vote === "yes")}
+                                            checked={isDateAndStatusInVotes(cell.date, "yes", localVotes)}
+                                            wasChecked={userVoteStatus && isDateAndStatusInVotes(cell.date, "yes", userVoteStatus)}
                                         />
                                         <CheckmarkNo
                                             size={24}
                                             onToggle={() => handleVoteChange(cell.date, "no")}
-                                            checked={localVotes.some(v => v.date.getTime() === cell.date.getTime() && v.vote === "no")}
-                                            wasChecked={userVoteStatus && userVoteStatus.some((v: any) => v.date === cell.date.toISOString() && v.vote === "no")}
+                                            checked={isDateAndStatusInVotes(cell.date, "no", localVotes)}
+                                            wasChecked={userVoteStatus && isDateAndStatusInVotes(cell.date, "no", userVoteStatus)}
                                         />
                                         <CheckmarkMaybe
                                             size={24}
                                             onToggle={() => handleVoteChange(cell.date, "maybe")}
-                                            checked={localVotes.some(v => v.date.getTime() === cell.date.getTime() && v.vote === "maybe")}
-                                            wasChecked={userVoteStatus && userVoteStatus.some((v: any) => v.date === cell.date.toISOString() && v.vote === "maybe")}
+                                            checked={isDateAndStatusInVotes(cell.date, "maybe", localVotes)}
+                                            wasChecked={userVoteStatus && isDateAndStatusInVotes(cell.date, "maybe", userVoteStatus)}
                                         />
                                     </div>
                                 )}
                                 <div className="d-flex justify-content-start flex-column flex-md-row gap-1 gap-md-3 ms-2">
                                     <DayVotesCount
                                         votesByDate={votesByDate}
-                                        day={cell.date.toISOString()}
+                                        day={cell.date}
                                     />
                                 </div>
                             </div>

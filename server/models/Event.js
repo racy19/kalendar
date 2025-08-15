@@ -29,7 +29,7 @@ const eventSchema = new mongoose.Schema({
     options: [
       {
         date: {
-          type: Date,
+          type: String,
           required: true
         },
         votes: [

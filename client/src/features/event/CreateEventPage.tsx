@@ -5,11 +5,12 @@ import InputText from "../../components/UI/InputText";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { useNavigate } from "react-router-dom";
+import { toggleDate } from "../../utils/calendarUtils";
 
 const CreateEvent = () => {
     const navigate = useNavigate();
 
-    const [selectedDates, setSelectedDates] = useState<Date[]>([]);
+    const [selectedDates, setSelectedDates] = useState<string[]>([]);
     const [formData, setFormData] = useState({
         title: "",
         description: "",
@@ -19,12 +20,8 @@ const CreateEvent = () => {
 
     const userId = useSelector((state: RootState) => state.auth.user?.id);
 
-    const handleDateToggle = (date: Date) => {
-        setSelectedDates(prevDate =>
-            prevDate.includes(date)
-                ? prevDate.filter(d => d.getTime() !== date.getTime())
-                : [...prevDate, date]
-        );
+    const handleDateToggle = (date: string) => {
+        setSelectedDates(prev => toggleDate(prev, date));
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,8 +66,6 @@ const CreateEvent = () => {
             setErrorMessage("Chyba při vytváření události");
         }
     }
-
-
 
     return (
         <div className="container mt-3 mt-lg-4">
