@@ -1,4 +1,4 @@
-import { Vote } from "../types/types";
+import { UserVoteStatus } from "../features/event/eventTypes";
 
 /**
  * @description return current year, month, day
@@ -127,7 +127,20 @@ export const isDateInSelected = (date: string, selectedDates: string[]): boolean
  * @param votedArray Array of votes to check against [{ date: Date, vote: string }]
  * @returns boolean indicating if the date and status match any entry in the array
  */
-export const isDateAndStatusInVotes = (date: string, status: string, voteArray: Vote[]): boolean => {
+export const isDateAndStatusInVotes = (date: string, status: string, voteArray: UserVoteStatus[]): boolean => {
     if (voteArray.length) return voteArray.some(vote => vote.date === date && vote.status === status);
     return false;
+}
+
+export const getMinMaxDate = (dateArray: string[]) => {
+    if (!dateArray.length) {
+        return { min: null, max: null };
+    }
+
+    const dates = dateArray.map(d => new Date(d));
+
+    const minDate = new Date(Math.min(...dates.map(d => d.getTime())));
+    const maxDate = new Date(Math.max(...dates.map(d => d.getTime())));
+
+    return { min: minDate.toLocaleDateString(), max: maxDate.toLocaleDateString() };
 }

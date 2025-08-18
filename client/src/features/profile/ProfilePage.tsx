@@ -3,12 +3,8 @@ import { useSelector } from "react-redux";
 import InputText from "../../components/UI/InputText";
 import ButtonSubmit from "../../components/UI/ButtonSubmit";
 import { RootState } from "../../store/store";
-
-interface UserData {
-    name: string;
-    email: string;
-    authType?: string;
-}
+import { UserData } from "./userTypes";
+import { changeUserName, changeUserPassword, getUserData } from "../../services/userServices";
 
 const Profile = () => {
     const user = useSelector((state: RootState) => state.auth.user);
@@ -26,17 +22,8 @@ const Profile = () => {
     useEffect(() => {
         const fetchUser = async () => {
             if (!user || !token) return;
-
             try {
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/user/${user.id}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-
-                if (!res.ok) throw new Error("Chyba při načítání uživatele");
-
-                const data = await res.json();
+                const data = await getUserData(user.id, token);
                 setUserData(data);
                 setUserDataFetched(true);
             } catch (err) {
@@ -51,20 +38,8 @@ const Profile = () => {
 
     const handleChangeName = async (newName: string) => {
         if (!user || !token || !newName) return;
-
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/user/${user.id}`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ name: newName }),
-            });
-
-            if (!res.ok) throw new Error("Chyba při aktualizaci uživatelského jména");
-
-            const updatedUser = await res.json();
+            const updatedUser = await changeUserName(user.id, newName, token);
             setUserData(updatedUser);
             setChangeNameForm(false);
             setNewName("");
@@ -75,29 +50,12 @@ const Profile = () => {
 
     const handleChangePassword = async () => {
         if (!user || !token) return;
-
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/user/${user.id}/password`, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    currentPassword,
-                    newPassword,
-                }),
-            });
+            const data = await changeUserPassword(user.id, currentPassword, newPassword, token);
+            if (data.message) setRenewPasswordMessage(data.message);
+            setCurrentPassword("");
+            setNewPassword("");
 
-            const data = await res.json();
-
-            if (!res.ok) {
-                setRenewPasswordMessage(data.error || "Chyba při změně hesla");
-            } else {
-                setRenewPasswordMessage(data.message);
-                setCurrentPassword("");
-                setNewPassword("");
-            }
         } catch (err) {
             console.error(err);
             setRenewPasswordMessage("Chyba při odeslání požadavku");
@@ -160,11 +118,10 @@ const Profile = () => {
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                     />
-                    <ButtonSubmit text="Změnit heslo" onClick={handleChangePassword} />
-
                     {renewPasswordMessage && (
                         <div className="alert alert-info mt-3">{renewPasswordMessage}</div>
                     )}
+                    <ButtonSubmit text="Změnit heslo" onClick={handleChangePassword} />
                 </div>
             )}
 

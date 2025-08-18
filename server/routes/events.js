@@ -34,13 +34,15 @@ router.post('/', async (req, res) => {
             date: date,
             votes: []
         }));
+        const invitedUsers = [];
 
         const event = new Event({
             title,
             description,
             options,
             userId: userId,
-            publicId
+            publicId,
+            invitedUsers
         });
 
         await event.save();
@@ -107,16 +109,16 @@ router.get("/user/:userId", async (req, res) => {
     }
 });
 
-// get all events where user is a participant (voted)
+// get all events where user is a participant (has already voted)
 router.get("/participant/:userId", async (req, res) => {
     try {
         const userId = req.params.userId;
         if (!mongoose.Types.ObjectId.isValid(userId)) {
             return res.status(400).json({ error: "Neplatné userId" });
         }
-        // find all events where userId is in votes of any option
+        // find all events where userId is in invitedUsers array
         const events = await Event.find({
-            "options.votes.userId": userId
+            "invitedUsers.userId": userId
         });
         res.json(events);
     } catch (err) { 
@@ -129,13 +131,10 @@ router.get("/participant/:userId", async (req, res) => {
 router.get("/:publicId", async (req, res) => {
     try {
         const publicId = req.params.publicId;
-
         const event = await Event.findOne({ publicId: publicId });
-
         if (!event) {
             return res.status(404).json({ error: "Událost nenalezena" });
         }
-
         res.json(event);
     } catch (err) {
         console.error("Chyba při načítání události:", err);
@@ -171,6 +170,13 @@ router.patch("/:publicId/vote", async (req, res) => {
             return res.status(404).json({ error: "Událost nebyla nalezena." });
         }
 
+        const invitedUser = event.invitedUsers.find(u => u.userId.toString() === userId);
+        if (!invitedUser) {
+            event.invitedUsers.push({
+                userId: new mongoose.Types.ObjectId(userId),
+                status: 'invited' // automatically accept if user is voting
+            });
+        }
         // for each vote, find the corresponding option and update or add the vote
         for (const vote of votes) {
             const { date, status } = vote;

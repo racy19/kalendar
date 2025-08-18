@@ -6,12 +6,10 @@ import Plus from "../components/UI/icons/Plus";
 import Pen from "../components/UI/icons/Pen";
 import X from "../components/UI/icons/X";
 import CalendarIcon from "../components/UI/icons/CalendarIcon";
-
-interface EventOption {
-  _id: string;
-  date: Date;
-  votes: string[];
-}
+import { aggregateFetchedEvent } from "../utils/eventUtils";
+import { EventOption } from "../features/event/eventTypes";
+import { deleteEvent, getParticipantEvent, getUserEvents } from "../services/eventsServices";
+import { getMinMaxDate } from "../utils/dateUtils";
 
 interface FetchedEvent {
   _id: string;
@@ -28,6 +26,7 @@ interface Event {
   description?: string;
   dates: string[];
   publicId: string;
+  votingParticipantCount?: number; // optional, only for voted events
 }
 
 const Dashboard = () => {
@@ -40,11 +39,7 @@ const Dashboard = () => {
 
   const handleDelete = async (eventId: string) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/events/${eventId}`, {
-        method: "DELETE",
-      });
-
-      if (!res.ok) throw new Error("Mazání selhalo");
+      await deleteEvent(eventId);
 
       // delete event from state
       setEvents((prev) => prev.filter((e) => e.publicId !== eventId));
@@ -53,39 +48,14 @@ const Dashboard = () => {
     }
   };
 
-  const getMinMaxDate = (dateArray: string[]) => {
-    if (!dateArray.length) {
-      return { min: null, max: null };
-    }
-
-    const dates = dateArray.map(d => new Date(d));
-
-    const minDate = new Date(Math.min(...dates.map(d => d.getTime())));
-    const maxDate = new Date(Math.max(...dates.map(d => d.getTime())));
-
-    return { min: minDate.toLocaleDateString(), max: maxDate.toLocaleDateString() };
-  }
-
   useEffect(() => {
     if (!user?.id) return;
 
     // Fetch events created by the user
     const fetchCreatorEvents = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/events/user/${user.id}`);
-        if (!response.ok) throw new Error("Chyba při načítání událostí");
-        const data = await response.json();
-        // return only dates of event, not user votes
-        const filteredData = data.map((event: FetchedEvent) => {
-          return {
-            _id: event._id,
-            title: event.title,
-            description: event.description,
-            dates: event.options.map(option => option.date),
-            publicId: event.publicId,
-          };
-        });
-        console.log(filteredData)
+        const userEvents = await getUserEvents(user.id);
+        const filteredData = aggregateFetchedEvent(userEvents as FetchedEvent[]);
         setEvents(filteredData);
       } catch (error) {
         console.error("Chyba při načítání událostí:", error);
@@ -95,26 +65,17 @@ const Dashboard = () => {
     // Fetch events where the user has voted
     const fetchVoterEvents = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/events/participant/${user.id}`);
-        if (!response.ok) throw new Error("Chyba při načítání událostí, kde jste hlasovali");
-        const data = await response.json();
-        const filteredData = data.map((event: FetchedEvent) => {
-          return {
-            _id: event._id,
-            title: event.title,
-            description: event.description,
-            dates: event.options.map(option => option.date),
-            publicId: event.publicId,
-          };
-        });
+        const participantEvents = await getParticipantEvent(user.id);
+        console.log("Fetched participant events:", participantEvents);
+        const filteredData = aggregateFetchedEvent(participantEvents as FetchedEvent[]);
         setVotedEvents(filteredData);
       } catch (error) {
         console.error("Chyba při načítání událostí, kde jste hlasovali:", error);
       }
     }
 
-    fetchCreatorEvents();
     fetchVoterEvents();
+    fetchCreatorEvents();
   }, [user?.id]);
 
   if (!user) return <p>Načítání uživatele...</p>;
@@ -138,12 +99,12 @@ const Dashboard = () => {
             {events.map(event => {
               // const dateString = event.dates.map(date => new Date(date).toLocaleDateString());
               return (
-                <div key={event._id} className="card text-dark bg-light mb-3 event-card">
+                <div key={event._id} className="card text-dark bg-light event-card">
                   <div className="card-header d-flex align-items-center gap-2">
                     <CalendarIcon size={20} color="#777" /><span>{event?.dates?.length && `${getMinMaxDate(event.dates)?.min} - ${getMinMaxDate(event.dates)?.max}`}</span>
                   </div>
-                  <div className="card-body">
-                    <div className="d-flex justify-content-between mb-3">
+                  <div className="card-body d-flex flex-column">
+                    <div className="d-flex justify-content-between">
                       <strong className="card-title" onClick={() => navigate(`/event/${event.publicId}`)}>{event.title} </strong>
                       <span className="d-flex">
                         <span
@@ -157,7 +118,8 @@ const Dashboard = () => {
                         ><X size={24} color="#dc3545" /></span>
                       </span>
                     </div>
-                    {event.description && <span className="card-text mt-2">{event.description}</span>}<br />
+                    {event.description && <p className="card-text mt-2">{event.description}</p>}
+                    <p className="mb-0 mt-auto text-end text-muted small">Zatím hlasovalo: {event.votingParticipantCount}</p>
                   </div>
 
                   {/* <p className="mt-2"><strong>{dateString.join(", ")}</strong></p> */}
@@ -174,12 +136,12 @@ const Dashboard = () => {
           <div className="event-card-container">
             {votedEvents.map(event => {
               return (
-                <div key={event._id} className="card text-dark bg-light mb-3 event-card">
+                <div key={event._id} className="card text-dark bg-light event-card">
                   <div className="card-header d-flex align-items-center gap-2"><CalendarIcon size={20} color="#777" />
                     <span>{event?.dates?.length && `${getMinMaxDate(event.dates)?.min} - ${getMinMaxDate(event.dates)?.max}`}</span>
                   </div>
-                  <div className="card-body">
-                    <div className="d-flex justify-content-between mb-3">
+                  <div className="card-body d-flex flex-column">
+                    <div className="d-flex justify-content-between">
                       <strong className="card-title" onClick={() => navigate(`/event/${event.publicId}`)}>{event.title} </strong>
                       <span>
                         <span
@@ -188,7 +150,8 @@ const Dashboard = () => {
                         ><CalendarIcon size={24} color="#0d6efd" /></span>
                       </span>
                     </div>
-                    {event.description && <span className="card-text">{event.description}</span>}<br />
+                    {event.description && <p className="card-text">{event.description}</p>}
+                    <p className="mb-0 mt-auto text-end text-muted small">Zatím hlasovalo: {event.votingParticipantCount}</p>
                   </div>
                 </div>
               )

@@ -47,6 +47,21 @@ const eventSchema = new mongoose.Schema({
           }
         ]
       }
+    ],
+
+    invitedUsers: [
+      {
+        userId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+          required: true
+        },
+        status: {
+          type: String,
+          enum: ['invited', 'accepted', 'declined'], // for now is used only 'invited', other statuses can be added later
+          default: 'invited'
+        }
+      } 
     ]
   });
 

@@ -1,14 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Calendar from "../../components/Calendar";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import ButtonSubmit from "../../components/UI/ButtonSubmit";
-import { EventOption, Vote } from "../../types/types";
 import InputText from "../../components/UI/InputText";
 import { getDateString } from "../../utils/dateUtils";
-import { toggleDate } from "../../utils/calendarUtils";
-import { getEvent, getUser, getUsers, submitVotes, updateEvent } from "../../services/events";
+import { changeText, toggleDate } from "../../utils/calendarUtils";
+import { getEvent, getUser, getUsers, submitVotes, updateEvent } from "../../services/eventsServices";
+import { EventOption, UserVoteStatus, VoteSummary } from "./eventTypes";
+import { aggregateVotesSummary } from "../../utils/eventUtils";
 
 const Event = () => {
     const { publicId } = useParams<{ publicId: string }>();
@@ -22,12 +23,10 @@ const Event = () => {
     });
 
     const [datesToVote, setDatesToVote] = useState<string[]>([]); // calendar prop: pole datumu k hlasovani o udalosti, nacita se z be, pripadne jde aktualizovat pomoci handleUpdateEvent
-    const [initialVotes, setInitialVotes] = useState<any[]>([]);
-    const [votes, setVotes] = useState<Vote[]>([]); // objekt s vysledky hlasovani votes.date.yes.count nebo votes.date.yes.participants, yes muze byt nahrazeno no nebo maybe, participants je pole jmen hlasujicich pro danou moznost
+    const [votes, setVotes] = useState<UserVoteStatus[]>([]); // objekt s vysledky hlasovani votes.date.yes.count nebo votes.date.yes.participants, yes muze byt nahrazeno no nebo maybe, participants je pole jmen hlasujicich pro danou moznost
     const [updatedDates, setUpdatedDates] = useState<string[]>([]); // updated dates od tvurce udalosti k aktualizaci
     const [participantIds, setParticipantIds] = useState<string[]>([]); // id vsech uzivatelu, kteri hlasovali alespon pro jeden termin
-    const [participants, setParticipants] = useState<any>(null); // objekt uzivatelu ve tvaru { _id: string, name: string }
-    const [userVoteStatus, setUserVoteStatus] = useState<any>([]); // volby aktualne prihlaseneho uzivatele
+    const [participants, setParticipants] = useState<any>(null); // objekt uzivatelu ve tvaru { _id: name }
 
     const [errorMessage, setErrorMessage] = useState<string>("");
     const [successMessage, setSuccessMessage] = useState<string>("");
@@ -45,10 +44,7 @@ const Event = () => {
 
     const handleChangeText = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value,
-        }));
+        setFormData(prev => changeText(prev, name, value));
     };
 
     // submit user votes for the event dates (yes, no, maybe)
@@ -85,7 +81,7 @@ const Event = () => {
 
             setSuccessMessage("Událost byla úspěšně aktualizována.");
 
-            // Sloučí nové datumy bez duplicit
+            // merge new dates with existing dates - porovnat updatedDates s datesToVote a vymazat datumy, ktere user vymazal
             setDatesToVote(prev => Array.from(new Set([...prev, ...updatedDates])));
 
             // volitelné: vyčistit “rozpracované” změny
@@ -169,50 +165,16 @@ const Event = () => {
         fetchEventCreator();
     }, [publicId, event?.userId]);
 
-    // load vote information
-    // - initialVotes object key = date
-    // - initialVotes.date.yes.count = number of 'yes' votes to given date ('no', 'maybe' analogically)
-    // - initialVotes.date.yes.participants = array of usernames voting for 'yes'
-    useEffect(() => {
-        if (event && participants) {
-            const options = event.options;
-            // initialize event votes record
-            const eventVotes: any = {};
-            const userStatus: any = [];
-
-            options.map((option: EventOption) => {
-                const date = option.date;
-
-                // initialize event votes to specific date
-                eventVotes[date] = {
-                    yes: { count: 0, participants: [] },
-                    no: { count: 0, participants: [] },
-                    maybe: { count: 0, participants: [] }
-                };
-
-                option.votes.map((vote: any) => {
-                    const voteStatus = vote.status;
-
-                    if (eventVotes[date][voteStatus]) {
-                        eventVotes[date][voteStatus].count++;
-                        eventVotes[date][voteStatus].participants.push(participants[vote.userId]);
-                    }
-
-                    // array with { date, status } for each date for logged user - to show in calendar as a previously picked status
-                    if (vote.userId === userId) {
-                        const userDateStatus = {
-                            date: date,
-                            status: voteStatus
-                        }
-                        userStatus.push(userDateStatus);
-                    }
-                })
-            })
-            setVotes(eventVotes);
-            setInitialVotes(eventVotes);
-            setUserVoteStatus(userStatus);
+    // build vote information for FE operations
+    const { votesSummary, userStatus } = useMemo(() => {
+        if (!event?.options || !participants || !userId) {
+            return {
+                votesSummary: {} as VoteSummary,
+                userStatus: [] as UserVoteStatus[],
+            };
         }
-    }, [event, participants])
+        return aggregateVotesSummary(event.options as EventOption[], participants, userId);
+    }, [event?.options, participants, userId]);
 
 
     return (
@@ -222,6 +184,7 @@ const Event = () => {
             <p>{event?.description}</p>
             {!isUserSameAsEventCreator &&
                 <p>Událost vytvořil/a: {eventCreator}</p>}
+            <p>Zatím hlasovalo: {participantIds.length}</p>
             {isUserSameAsEventCreator &&
                 <>
                     <InputText
@@ -243,11 +206,11 @@ const Event = () => {
             <Calendar
                 eventDates={datesToVote}
                 updatedEventDates={updatedDates}
-                onVoteChange={(updatedVotes: Vote[]) => setVotes(updatedVotes)}
+                onVoteChange={(updatedVotes: UserVoteStatus[]) => setVotes(updatedVotes)}
                 showCellRadios={!isUserSameAsEventCreator}
-                votesByDate={initialVotes}
+                votesByDate={votesSummary}
                 handleOnClick={handleDateToggle}
-                userVoteStatus={userVoteStatus}
+                userVoteStatus={userStatus}
             />
             {errorMessage && (
                 <div className="alert alert-danger mt-3">

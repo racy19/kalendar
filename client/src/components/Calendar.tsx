@@ -1,20 +1,20 @@
 import { Key, useState } from "react";
-import { Vote } from "../types/types";
 import CheckmarkYes from "./UI/icons/CheckmarkYes";
 import CheckmarkMaybe from "./UI/icons/CheckmarkMaybe";
 import CheckmarkNo from "./UI/icons/CheckmarkNo";
 import 'react-tooltip/dist/react-tooltip.css';
 import { generateCalendarDays, getCurrentDate, getNextMonth, getPrevMonth, isDateAndStatusInVotes, isDateInSelected, isDateToday } from "../utils/dateUtils";
 import DayVotesCount from "./UI/calendarComponents/DayVotesCount";
+import { UserVoteStatus, VoteStatus } from "../features/event/eventTypes";
 
 interface CalendarProps {
     eventDates?: string[];
     updatedEventDates?: string[];
     showCellRadios?: boolean;
     handleOnClick?: (date: string) => void;
-    onVoteChange?: (updatedVotes: Vote[]) => void;
+    onVoteChange?: (updatedVotes: UserVoteStatus[]) => void;
     votesByDate?: any;
-    userVoteStatus?: Vote[];
+    userVoteStatus?: UserVoteStatus[];
 }
 
 type CalendarDay = { day: number; date: string; isCurrentMonth: boolean };
@@ -26,7 +26,7 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
 
     const [yearToShow, setYearToShow] = useState(current.year);
     const [monthToShow, setMonthToShow] = useState(current.month);
-    const [localVotes, setLocalVotes] = useState<Vote[]>([]);
+    const [localVotes, setLocalVotes] = useState<UserVoteStatus[]>([]);
 
     const dayRow = ["Po", "Út", "St", "Čt", "Pá", "So", "Ne"];
     const months = [
@@ -48,7 +48,7 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
 
     const calendarDayNumberArray = generateCalendarDays(yearToShow, monthToShow)
 
-    const handleVoteChange = (date: string, status: string) => {
+    const handleVoteChange = (date: string, status: VoteStatus) => {
         const updatedVotes = localVotes.filter(v => v.date !== date);
         if (status) {
             updatedVotes.push({ date, status });
