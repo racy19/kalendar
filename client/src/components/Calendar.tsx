@@ -64,20 +64,22 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
                 const isToday = isDateToday(cellDate);
 
                 const isEventOption = isDateInSelected(cell.date, eventDates || []);
-                const isUpdated = isDateInSelected(cell.date, updatedEventDates || []);
+                const isDateInUpdated = isDateInSelected(cell.date, updatedEventDates || []);
+                const isRemovedEventOption = isEventOption && !isDateInSelected(cell.date, updatedEventDates || []);
 
                 return (
                     <div
                         key={colIndex}
-                        className={`col border position-relative text-start p-1 p-sm-2 calendar-cell ${isEventOption
-                            ? "callendar-cell-event"
-                            : isUpdated
-                                ? "bg-success text-white"
-                                : isToday
-                                    ? "bg-primary text-white"
-                                    : cell.isCurrentMonth
-                                        ? ""
-                                        : "text-muted bg-light"
+                        className={`col border position-relative text-start p-1 p-sm-2 calendar-cell ${isEventOption ? "callendar-cell-event" : ""}
+                            ${isDateInUpdated
+                                ? "callendar-cell-event"
+                                : isRemovedEventOption
+                                    ? "callendar-cell-event-removed"
+                                    : isToday
+                                        ? "bg-primary text-white"
+                                        : cell.isCurrentMonth
+                                            ? ""
+                                            : "text-muted bg-light"
                             }`}
                         onClick={() => handleOnClick?.(cell.date)}
                     >

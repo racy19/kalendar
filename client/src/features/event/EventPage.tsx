@@ -40,7 +40,10 @@ const Event = () => {
     const handleDateToggle = (date: string) => {
         if (!isUserSameAsEventCreator) return;
         setUpdatedDates(prev => toggleDate(prev, date));
+        console.log("Updated dates:", updatedDates);
     };
+
+    console.log("datesToVote:", datesToVote);
 
     const handleChangeText = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -82,7 +85,7 @@ const Event = () => {
             setSuccessMessage("Událost byla úspěšně aktualizována.");
 
             // merge new dates with existing dates - porovnat updatedDates s datesToVote a vymazat datumy, ktere user vymazal
-            setDatesToVote(prev => Array.from(new Set([...prev, ...updatedDates])));
+            //setDatesToVote(prev => Array.from(new Set([...prev, ...updatedDates])));
 
             // volitelné: vyčistit “rozpracované” změny
             // setUpdatedDates([]);
@@ -116,6 +119,7 @@ const Event = () => {
 
                 const eventDates = options.map(opt => getDateString(new Date(opt.date)));
                 setDatesToVote(eventDates);
+                setUpdatedDates(eventDates);
 
             } catch (error) {
                 console.error("Chyba při načítání události:", error);

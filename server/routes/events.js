@@ -81,6 +81,8 @@ router.patch('/:publicId', async (req, res) => {
                 });
             }
         });
+        // Remove dates that are no longer in the updated dates array
+        event.options = event.options.filter(option => dates.includes(option.date));
 
         // Save the updated event
         await event.save();

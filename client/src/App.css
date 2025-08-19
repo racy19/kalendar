@@ -21,9 +21,9 @@
 }
 
 .event-card-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
-    gap: 1.5rem 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 1rem;
 }
 
 .calendar-cell {
@@ -38,6 +38,10 @@
 
 .callendar-cell-event {
     background-color: #DBF9DB;
+}
+
+.callendar-cell-event-removed {
+    background-color: #F9DBDB;
 }
 
 .calendar-checkmark:hover {
