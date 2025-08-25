@@ -1,7 +1,8 @@
 import { UserData } from "../features/profile/userTypes";
+import { apiFetch } from "./apiFetch";
 
 export const getUserData = async (userId: string, token: string): Promise<UserData> => {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/user/${userId}`, {
+    const res = await apiFetch(`${import.meta.env.VITE_API_URL}/auth/user/${userId}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -13,7 +14,7 @@ export const getUserData = async (userId: string, token: string): Promise<UserDa
 }
 
 export const changeUserName = async (userId: string, newName: string, token: string): Promise<UserData> => {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/user/${userId}`, {
+    const res = await apiFetch(`${import.meta.env.VITE_API_URL}/auth/user/${userId}`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
@@ -28,7 +29,7 @@ export const changeUserName = async (userId: string, newName: string, token: str
 }
 
 export const changeUserPassword = async (userId: string, currentPassword: string, newPassword: string, token: string): Promise<{ message: string }> => {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/user/${userId}/password`, {
+    const res = await apiFetch(`${import.meta.env.VITE_API_URL}/auth/user/${userId}/password`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",

@@ -7,6 +7,7 @@ import { login } from '../../store/auth/authSlice';
 import { GoogleLogin } from '@react-oauth/google';
 import { Tooltip } from 'react-tooltip';
 import 'react-tooltip/dist/react-tooltip.css';
+import { apiFetch } from "../../services/apiFetch";
 
 const Login = () => {
     const dispatch = useDispatch();
@@ -32,11 +33,8 @@ const Login = () => {
         e.preventDefault();
 
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
+            const response = await apiFetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
                 body: JSON.stringify({
                     email: formData.email,
                     password: formData.password,
@@ -80,7 +78,7 @@ const Login = () => {
 
     const handleGoogleLogin = async (googleToken: string) => {
         try {
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/google-login`, {
+            const res = await apiFetch(`${import.meta.env.VITE_API_URL}/auth/google-login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

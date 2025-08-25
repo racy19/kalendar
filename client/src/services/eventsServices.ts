@@ -1,7 +1,8 @@
 import { FetchedEvent, UserResponse } from "../features/event/eventTypes";
+import { apiFetch } from "./apiFetch";
 
 export async function submitVotes(publicId: string, userId: string, votes: {date: string; status: string}[]) {
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/events/${publicId}/vote`, {
+  const res = await apiFetch(`${import.meta.env.VITE_API_URL}/events/${publicId}/vote`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ userId, votes }),
@@ -17,7 +18,7 @@ export type UpdateEventPayload = {
 };
 
 export async function updateEvent(publicId: string, payload: UpdateEventPayload) {
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/events/${publicId}`, {
+  const res = await apiFetch(`${import.meta.env.VITE_API_URL}/events/${publicId}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -27,13 +28,13 @@ export async function updateEvent(publicId: string, payload: UpdateEventPayload)
 }
 
 export async function getEvent(publicId: string): Promise<FetchedEvent> {
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/events/${publicId}`);
+  const res = await apiFetch(`${import.meta.env.VITE_API_URL}/events/${publicId}`);
   if (!res.ok) throw new Error("Chyba při načítání události");
   return res.json();
 }
 
 export async function deleteEvent(eventId: string): Promise<void> {
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/events/${eventId}`, {
+  const res = await apiFetch(`${import.meta.env.VITE_API_URL}/events/${eventId}`, {
     method: "DELETE",
   });
   if (!res.ok) throw new Error("Chyba při mazání události");
@@ -41,7 +42,7 @@ export async function deleteEvent(eventId: string): Promise<void> {
 }
 
 export async function getUser(userId: string): Promise<UserResponse> {
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}`);
+  const res = await apiFetch(`${import.meta.env.VITE_API_URL}/users/${userId}`);
   if (!res.ok) throw new Error(`Chyba při načítání uživatele ${userId}`);
   return res.json();
 }
@@ -52,13 +53,13 @@ export async function getUsers(userIds: string[]): Promise<UserResponse[]> {
 }
 
 export async function getUserEvents(userId: string): Promise<FetchedEvent[]> {
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/events/user/${userId}`);
+  const res = await apiFetch(`${import.meta.env.VITE_API_URL}/events/user/${userId}`);
   if (!res.ok) throw new Error("Chyba při načítání událostí uživatele");
   return res.json();
 }
 
 export async function getParticipantEvent(userId: string): Promise<FetchedEvent[]> {
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/events/participant/${userId}`);
+  const res = await apiFetch(`${import.meta.env.VITE_API_URL}/events/participant/${userId}`);
   if (!res.ok) throw new Error("Chyba při načítání událostí, kde jste hlasovali");
   return res.json();
 }

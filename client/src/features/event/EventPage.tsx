@@ -83,12 +83,6 @@ const Event = () => {
             });
 
             setSuccessMessage("Událost byla úspěšně aktualizována.");
-
-            // merge new dates with existing dates - porovnat updatedDates s datesToVote a vymazat datumy, ktere user vymazal
-            //setDatesToVote(prev => Array.from(new Set([...prev, ...updatedDates])));
-
-            // volitelné: vyčistit “rozpracované” změny
-            // setUpdatedDates([]);
         } catch (error) {
             console.error("Chyba při aktualizaci události:", error);
             setErrorMessage("Došlo k chybě při aktualizaci události. Zkuste to prosím znovu.");

@@ -44,7 +44,7 @@ const Navbar = () => {
                     {user && (
                         <>
                             <span className="nav-item">
-                                Přihlášen: <Link to="/profile" className="link-white">&nbsp;{user.name}</Link>
+                                <Link to="/profile" className="link-white">&nbsp;{user.name || user.email}</Link>
                             </span>
                         </>
                     )}

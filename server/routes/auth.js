@@ -95,7 +95,7 @@ router.post('/google-login', async (req, res) => {
     const payload = ticket.getPayload();
     if (!payload) return res.status(400).json({ error: 'Neplatný token' });
 
-    const { sub: googleId, email, name, picture } = payload;
+    const { sub: googleId, email, name, given_name, family_name, picture } = payload;
 
     let user = await User.findOne({ email });
     if (user && user.authType === 'local') {
@@ -107,7 +107,7 @@ router.post('/google-login', async (req, res) => {
     if (!user) {
       // new user
       user = new User({
-        name,
+        name: name || given_name + ' ' + family_name,
         email,
         googleId,
         authType: 'google',
