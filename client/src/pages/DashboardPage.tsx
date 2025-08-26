@@ -101,7 +101,7 @@ const Dashboard = () => {
               return (
                 <div key={event._id} 
                 className={`card ${isDarkMode ? "bg-dark-mode no-border" : "text-dark bg-light"} event-card`}>
-                  <div className="card-header d-flex align-items-center gap-2">
+                  <div className={`card-header d-flex align-items-center gap-2 ${isDarkMode ? "no-border" : ""}`}>
                     <CalendarIcon size={20} color="#777" /><span>{event?.dates?.length && `${getMinMaxDate(event.dates)?.min} - ${getMinMaxDate(event.dates)?.max}`}</span>
                   </div>
                   <div className="card-body d-flex flex-column">
@@ -120,7 +120,7 @@ const Dashboard = () => {
                       </span>
                     </div>
                     {event.description && <p className="card-text mt-2">{event.description}</p>}
-                    <p className="mb-0 mt-auto text-end text-muted small">Zatím hlasovalo: {event.votingParticipantCount}</p>
+                    <p className={`mb-0 mt-auto text-end small ${isDarkMode ? "" : "text-muted"}`}>Zatím hlasovalo: {event.votingParticipantCount}</p>
                   </div>
 
                   {/* <p className="mt-2"><strong>{dateString.join(", ")}</strong></p> */}
@@ -138,7 +138,7 @@ const Dashboard = () => {
               return (
                 <div key={event._id} 
                 className={`card ${isDarkMode ? "bg-dark-mode no-border" : "text-dark bg-light"} event-card`}>
-                  <div className="card-header d-flex align-items-center gap-2"><CalendarIcon size={20} color="#777" />
+                  <div className={`card-header d-flex align-items-center gap-2 ${isDarkMode ? "no-border" : ""}`}><CalendarIcon size={20} color="#777" />
                     <span>{event?.dates?.length && `${getMinMaxDate(event.dates)?.min} - ${getMinMaxDate(event.dates)?.max}`}</span>
                   </div>
                   <div className="card-body d-flex flex-column">
@@ -152,7 +152,7 @@ const Dashboard = () => {
                       </span>
                     </div>
                     {event.description && <p className="card-text">{event.description}</p>}
-                    <p className="mb-0 mt-auto text-end text-muted small">Zatím hlasovalo: {event.votingParticipantCount}</p>
+                    <p className={`mb-0 mt-auto text-end small ${isDarkMode ? "" : "text-muted"}`}>Zatím hlasovalo: {event.votingParticipantCount}</p>
                   </div>
                 </div>
               )

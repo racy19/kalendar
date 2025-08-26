@@ -6,6 +6,10 @@ import 'react-tooltip/dist/react-tooltip.css';
 import { generateCalendarDays, getCurrentDate, getNextMonth, getPrevMonth, isDateAndStatusInVotes, isDateInSelected, isDateToday } from "../utils/dateUtils";
 import DayVotesCount from "./UI/calendarComponents/DayVotesCount";
 import { UserVoteStatus, VoteStatus } from "../features/event/eventTypes";
+import { useSelector } from "react-redux";
+import { RootState } from "../store/store";
+import Left from "./UI/icons/Left";
+import Right from "./UI/icons/Right";
 
 interface CalendarProps {
     eventDates?: string[];
@@ -22,6 +26,7 @@ type CalendarDay = { day: number; date: string; isCurrentMonth: boolean };
 type CalendarRow = CalendarDay[];
 
 const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteChange, votesByDate = {}, updatedEventDates, userVoteStatus }: CalendarProps) => {
+    const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
     const current = getCurrentDate();
 
     const [yearToShow, setYearToShow] = useState(current.year);
@@ -70,16 +75,16 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
                 return (
                     <div
                         key={colIndex}
-                        className={`col border position-relative text-start p-1 p-sm-2 calendar-cell ${isEventOption ? "callendar-cell-event" : ""}
+                        className={`${isDarkMode ? "" : "border"} col position-relative text-start p-1 p-sm-2 calendar-cell ${isEventOption ? "calendar-cell-event" : ""}
                             ${isDateInUpdated
-                                ? "callendar-cell-event"
+                                ? "calendar-cell-event"
                                 : isRemovedEventOption
-                                    ? "callendar-cell-event-removed"
+                                    ? "calendar-cell-event-removed"
                                     : isToday
                                         ? "bg-primary text-white"
                                         : cell.isCurrentMonth
                                             ? ""
-                                            : "text-muted bg-light"
+                                            : `${isDarkMode ? "black-dark-mode text-secondary" : "text-muted bg-light"}`
                             }`}
                         onClick={() => handleOnClick?.(cell.date)}
                     >
@@ -95,18 +100,21 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
                                             onToggle={() => handleVoteChange(cell.date, "yes")}
                                             checked={isDateAndStatusInVotes(cell.date, "yes", localVotes)}
                                             wasChecked={userVoteStatus && isDateAndStatusInVotes(cell.date, "yes", userVoteStatus)}
+                                            isDarkMode={isDarkMode}
                                         />
                                         <CheckmarkNo
                                             size={24}
                                             onToggle={() => handleVoteChange(cell.date, "no")}
                                             checked={isDateAndStatusInVotes(cell.date, "no", localVotes)}
                                             wasChecked={userVoteStatus && isDateAndStatusInVotes(cell.date, "no", userVoteStatus)}
+                                            isDarkMode={isDarkMode}
                                         />
                                         <CheckmarkMaybe
                                             size={24}
                                             onToggle={() => handleVoteChange(cell.date, "maybe")}
                                             checked={isDateAndStatusInVotes(cell.date, "maybe", localVotes)}
                                             wasChecked={userVoteStatus && isDateAndStatusInVotes(cell.date, "maybe", userVoteStatus)}
+                                            isDarkMode={isDarkMode}
                                         />
                                     </div>
                                 )}
@@ -126,21 +134,17 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
     ));
 
     return (
-        <div className="calendar-wrapper">
+        <div className={`calendar-wrapper ${isDarkMode ? "calendar-dark-mode" : ""}`}>
             <div className="container h-100 d-flex flex-column">
                 <h4 className="mt-3 mb-4 text-center">
-                    <button type="button" className="btn btn-primary me-2" onClick={setPrevMonth}>
-                        &lt;
-                    </button>
+                    <Left size={26} color={isDarkMode ? "#fff" : "#000"} className="me-2 link" onClick={setPrevMonth} />
                     <span className="calendar-headline">
                         {months[monthToShow]} {yearToShow}
                     </span>
-                    <button type="button" className="btn btn-primary ms-2" onClick={setNextMonth}>
-                        &gt;
-                    </button>
+                    <Right size={26} color={isDarkMode ? "#fff" : "#000"} className="ms-2 link" onClick={setNextMonth} />
                 </h4>
 
-                <div className="row bg-light border-bottom text-center fw-bold">
+                <div className={`row text-center fw-bold ${isDarkMode ? "light-black-dark-mode" : "bg-light border-bottom"}`}>
                     {dayRow.map((day, index) => (
                         <div key={index} className="col py-2 calendar-cell-header">
                             {day}

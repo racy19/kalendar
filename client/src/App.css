@@ -36,12 +36,28 @@
     padding: 0.5rem 0;
 }
 
-.callendar-cell-event {
+.calendar-cell-event::before,
+.calendar-cell-event-removed::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.calendar-cell-event::before {
     background-color: #DBF9DB;
 }
 
-.callendar-cell-event-removed {
+.calendar-cell-event-removed::before {
     background-color: #F9DBDB;
+}
+
+.calendar-cell-event>*,
+.calendar-cell-event-removed>* {
+    position: relative;
+    z-index: 1;
 }
 
 .calendar-checkmark:hover {
@@ -70,12 +86,16 @@
 
 .no-border {
     border: none;
-    border-radius: 0;
+    border-radius: 0 !important;
 }
 
 /* Dark mode styles */
 .black-dark-mode {
     background-color: #111;
+}
+
+.light-black-dark-mode {
+    background-color: #222;
 }
 
 .bg-dark-mode {
@@ -93,8 +113,18 @@
 .bg-dark-mode h5,
 .bg-dark-mode h6,
 .bg-dark-mode p,
-.bg-dark-mode span {
+.bg-dark-mode span,
+.bg-dark-mode strong,
+.bg-dark-mode label,
+.calendar-wrapper.calendar-dark-mode .calendar-cell-header,
+.calendar-wrapper.calendar-dark-mode .calendar-cell {
+    color: #ccc;
+}
+
+.bg-dark-mode input {
+    background-color: #333;
     color: white;
+    border: 1px solid #555;
 }
 
 .bg-dark-mode .event-card .card-header {
@@ -105,6 +135,16 @@
 .bg-dark-mode .event-card .card-body {
     background-color: #1f1b24;
     color: white;
+}
+
+.calendar-dark-mode .calendar-cell {
+    background-color: #2c2c2c;
+    color: white;
+    border: 1px solid #444;
+}
+
+.google-login-section span {
+    color: #3c4043;
 }
 
 @media screen and (max-width: 576px) {

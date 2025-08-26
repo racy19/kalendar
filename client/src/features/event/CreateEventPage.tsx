@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { useNavigate } from "react-router-dom";
 import { toggleDate } from "../../utils/calendarUtils";
+import Left from "../../components/UI/icons/Left";
 
 const CreateEvent = () => {
     const navigate = useNavigate();
@@ -69,7 +70,8 @@ const CreateEvent = () => {
 
     return (
         <div className="container mt-3 mt-lg-4">
-            <h1>Vytvořit událost</h1>
+            <span onClick={() => navigate('/dashboard')} className="link"><Left size={26} color="#3a005f" />zpět</span>
+            <h1 className="mt-3">Vytvořit událost</h1>
             <form onSubmit={handleSubmit}>
                 <InputText
                     id="title"

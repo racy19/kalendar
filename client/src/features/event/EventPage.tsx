@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Calendar from "../../components/Calendar";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
@@ -10,9 +10,13 @@ import { changeText, toggleDate } from "../../utils/calendarUtils";
 import { getEvent, getUser, getUsers, submitVotes, updateEvent } from "../../services/eventsServices";
 import { EventOption, UserVoteStatus, VoteSummary } from "./eventTypes";
 import { aggregateVotesSummary } from "../../utils/eventUtils";
+import Left from "../../components/UI/icons/Left";
 
 const Event = () => {
     const { publicId } = useParams<{ publicId: string }>();
+
+    const navigate = useNavigate();
+
     const [event, setEvent] = useState<any>(null);
     const [eventCreator, setEventCreator] = useState<string>("");
 
@@ -177,8 +181,8 @@ const Event = () => {
 
     return (
         <div className="container mt-3 mt-lg-4">
-            <p><Link to="/dashboard">zpět</Link></p>
-            <h1>{event?.title}</h1>
+            <span onClick={() => navigate('/dashboard')} className="link"><Left size={26} color="#3a005f"/>zpět</span>
+            <h1 className="mt-3">{event?.title}</h1>
             <p>{event?.description}</p>
             {!isUserSameAsEventCreator &&
                 <p>Událost vytvořil/a: {eventCreator}</p>}

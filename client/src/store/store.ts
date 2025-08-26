@@ -12,7 +12,7 @@ const rootReducer = combineReducers({
   theme: themeReducer,
 });
 
-const persistConfig = { key: 'root', storage, whitelist: ['auth'] };
+const persistConfig = { key: 'root', storage, whitelist: ['auth', 'theme'] };
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 // ---- session timer ----
