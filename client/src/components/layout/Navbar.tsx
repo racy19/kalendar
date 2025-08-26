@@ -5,6 +5,7 @@ import { logout } from "../../store/auth/authSlice";
 import CalendarIcon from "../UI/icons/CalendarIcon";
 import Plus from "../UI/icons/Plus";
 import PowerOff from "../UI/icons/PowerOff";
+import ThemeToggler from "../UI/ThemeToggler";
 
 const Navbar = () => {
     const navigate = useNavigate();
@@ -17,7 +18,7 @@ const Navbar = () => {
     };
 
     return (
-        <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+        <nav className="navbar navbar-expand-lg">
             <div className="container d-flex justify-content-between">
                 <div className="d-flex align-items-center">
                     <NavLink className="navbar-brand me-lg-5" to="/dashboard">
@@ -41,6 +42,7 @@ const Navbar = () => {
 
 
                 <span className="navbar-nav ms-auto d-flex flex-row gap-2 align-items-center">
+                    <ThemeToggler />
                     {user && (
                         <>
                             <span className="nav-item">

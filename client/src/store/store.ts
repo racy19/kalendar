@@ -1,12 +1,16 @@
 import { configureStore, createListenerMiddleware } from '@reduxjs/toolkit';
 import authReducer, { login, logout } from './auth/authSlice';
+import themeReducer from './themeSlice';
 import {
   persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER,
 } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import { combineReducers } from 'redux';
 
-const rootReducer = combineReducers({ auth: authReducer });
+const rootReducer = combineReducers({ 
+  auth: authReducer,
+  theme: themeReducer,
+});
 
 const persistConfig = { key: 'root', storage, whitelist: ['auth'] };
 const persistedReducer = persistReducer(persistConfig, rootReducer);

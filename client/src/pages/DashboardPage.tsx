@@ -33,6 +33,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const user = useSelector((state: RootState) => state.auth.user);
+  const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
 
   const [events, setEvents] = useState<Event[]>([]);
   const [votedEvents, setVotedEvents] = useState<Event[]>([]);
@@ -66,7 +67,6 @@ const Dashboard = () => {
     const fetchVoterEvents = async () => {
       try {
         const participantEvents = await getParticipantEvent(user.id);
-        console.log("Fetched participant events:", participantEvents);
         const filteredData = aggregateFetchedEvent(participantEvents as FetchedEvent[]);
         setVotedEvents(filteredData);
       } catch (error) {
@@ -83,7 +83,7 @@ const Dashboard = () => {
   return (
     <div className="container mt-3 mt-lg-4">
       <h1 className="mb-4">Moje události</h1>
-      <div className="border rounded bg-light p-3 mb-4">
+      <div className={`${isDarkMode ? "bg-dark-mode-light" : "border rounded bg-light"} p-3 mb-4`}>
         <h3 className="mt-1 mb-4 d-flex justify-content-between">
           <span>Vytvořené události</span>
           <span className="link" onClick={() => navigate(`/create-event`)}>
@@ -99,7 +99,8 @@ const Dashboard = () => {
             {events.map(event => {
               // const dateString = event.dates.map(date => new Date(date).toLocaleDateString());
               return (
-                <div key={event._id} className="card text-dark bg-light event-card">
+                <div key={event._id} 
+                className={`card ${isDarkMode ? "bg-dark-mode no-border" : "text-dark bg-light"} event-card`}>
                   <div className="card-header d-flex align-items-center gap-2">
                     <CalendarIcon size={20} color="#777" /><span>{event?.dates?.length && `${getMinMaxDate(event.dates)?.min} - ${getMinMaxDate(event.dates)?.max}`}</span>
                   </div>
@@ -129,14 +130,14 @@ const Dashboard = () => {
             )}
           </div> : <p>Nemáte žádné události.</p>}
       </div>
-      <div className="border rounded bg-light p-3 mb-4">
-
+      <div className={`${isDarkMode ? "bg-dark-mode-light" : "border rounded bg-light"} p-3 mb-4`}>
         <h3 className="mt-1 mb-4">Události, kde jsem hlasoval/a</h3>
         {votedEvents.length > 0 ?
           <div className="event-card-container">
             {votedEvents.map(event => {
               return (
-                <div key={event._id} className="card text-dark bg-light event-card">
+                <div key={event._id} 
+                className={`card ${isDarkMode ? "bg-dark-mode no-border" : "text-dark bg-light"} event-card`}>
                   <div className="card-header d-flex align-items-center gap-2"><CalendarIcon size={20} color="#777" />
                     <span>{event?.dates?.length && `${getMinMaxDate(event.dates)?.min} - ${getMinMaxDate(event.dates)?.max}`}</span>
                   </div>
