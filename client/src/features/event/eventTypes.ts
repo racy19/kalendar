@@ -25,6 +25,7 @@ export type VoteStatus = "yes" | "no" | "maybe";
 export type UserVoteStatus = {
     date: string;
     status: VoteStatus;
+    note?: string;
 };
 
 // types for status aggregation

@@ -180,31 +180,33 @@ const Event = () => {
 
 
     return (
-        <div className="container mt-3 mt-lg-4">
-            <span onClick={() => navigate('/dashboard')} className="link"><Left size={26} color="#3a005f"/>zpět</span>
-            <h1 className="mt-3">{event?.title}</h1>
-            <p>{event?.description}</p>
-            {!isUserSameAsEventCreator &&
-                <p>Událost vytvořil/a: {eventCreator}</p>}
-            <p>Zatím hlasovalo: {participantIds.length}</p>
-            {isUserSameAsEventCreator &&
-                <>
-                    <InputText
-                        id="title"
-                        label="Nový název události"
-                        required={true}
-                        value={formData.title}
-                        onChange={handleChangeText}
-                    />
-                    <InputText
-                        id="description"
-                        label="Nový popis události"
-                        required={false}
-                        value={formData.description}
-                        onChange={handleChangeText}
-                    />
-                </>
-            }
+        <>
+            <div className="container mt-3 mt-lg-4">
+                <span onClick={() => navigate('/dashboard')} className="link"><Left size={26} color="#3a005f" />zpět</span>
+                <h1 className="mt-3">{event?.title}</h1>
+                <p>{event?.description}</p>
+                {!isUserSameAsEventCreator &&
+                    <p>Událost vytvořil/a: {eventCreator}</p>}
+                <p>Zatím hlasovalo: {participantIds.length}</p>
+                {isUserSameAsEventCreator &&
+                    <>
+                        <InputText
+                            id="title"
+                            label="Nový název události"
+                            required={true}
+                            value={formData.title}
+                            onChange={handleChangeText}
+                        />
+                        <InputText
+                            id="description"
+                            label="Nový popis události"
+                            required={false}
+                            value={formData.description}
+                            onChange={handleChangeText}
+                        />
+                    </>
+                }
+            </div>
             <Calendar
                 eventDates={datesToVote}
                 updatedEventDates={updatedDates}
@@ -214,33 +216,35 @@ const Event = () => {
                 handleOnClick={handleDateToggle}
                 userVoteStatus={userStatus}
             />
-            {errorMessage && (
-                <div className="alert alert-danger mt-3">
-                    {errorMessage}
-                </div>
-            )}
-            {successMessage && (
-                <div className="alert alert-success mt-3">
-                    {successMessage}
-                </div>
-            )}
-            {!isUserSameAsEventCreator ? (
-                <form onSubmit={handleSubmitVotes}>
-                    <ButtonSubmit
-                        text="Uložit moje hlasování"
-                        className="my-3"
-                    />
-                </form>
-            ) : (
-                <form onSubmit={handleUpdateEvent}>
-                    <ButtonSubmit
-                        text="Aktualizovat událost"
-                        className="my-3"
-                    />
-                </form>
-            )
-            }
-        </div>
+            <div className="container mt-3 mt-lg-4">
+                {errorMessage && (
+                    <div className="alert alert-danger mt-3">
+                        {errorMessage}
+                    </div>
+                )}
+                {successMessage && (
+                    <div className="alert alert-success mt-3">
+                        {successMessage}
+                    </div>
+                )}
+                {!isUserSameAsEventCreator ? (
+                    <form onSubmit={handleSubmitVotes}>
+                        <ButtonSubmit
+                            text="Uložit moje hlasování"
+                            className="my-3"
+                        />
+                    </form>
+                ) : (
+                    <form onSubmit={handleUpdateEvent}>
+                        <ButtonSubmit
+                            text="Aktualizovat událost"
+                            className="my-3"
+                        />
+                    </form>
+                )
+                }
+            </div>
+        </>
     );
 }
 

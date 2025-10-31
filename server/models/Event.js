@@ -43,6 +43,10 @@ const eventSchema = new mongoose.Schema({
               type: String,
               enum: ['yes', 'no', 'maybe'],
               required: true
+            },
+            note: {
+              type: String, // optional field for user to add notes to their vote
+              required: false
             }
           }
         ]

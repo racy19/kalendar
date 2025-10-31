@@ -10,6 +10,9 @@ import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import Left from "./UI/icons/Left";
 import Right from "./UI/icons/Right";
+import Modal from "./UI/Modal";
+import InputText from "./UI/InputText";
+import Pen from "./UI/icons/Pen";
 
 interface CalendarProps {
     eventDates?: string[];
@@ -32,6 +35,8 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
     const [yearToShow, setYearToShow] = useState(current.year);
     const [monthToShow, setMonthToShow] = useState(current.month);
     const [localVotes, setLocalVotes] = useState<UserVoteStatus[]>([]);
+    const [noteText, setNoteText] = useState<string>("");
+    const [openModal, setOpenModal] = useState(false);
 
     const dayRow = ["Po", "Út", "St", "Čt", "Pá", "So", "Ne"];
     const months = [
@@ -62,6 +67,21 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
         onVoteChange?.(updatedVotes);
     };
 
+    const handleDayNote = (date: string, note: string) => {
+        if (!date) return;
+        if (!localVotes.find(v => v.date === date)) localVotes.push({ date, status: "maybe" }); // default status if note is added without vote
+        
+        const updatedVotes = localVotes.map(v => {
+            if (v.date === date) {
+                return { ...v, note };
+            }
+            return v;
+        });
+        setLocalVotes(updatedVotes);
+        onVoteChange?.(updatedVotes);
+    };
+    console.log(localVotes);
+
     const daysMapped = calendarDayNumberArray.map((row: CalendarRow, rowIndex: Key) => (
         <div key={rowIndex} className="row flex-fill">
             {row.map((cell: CalendarDay, colIndex: Key) => {
@@ -90,6 +110,9 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
                     >
                         <small className="position-absolute top-0 end-0 m-1">
                             {cell.day}
+                        </small>
+                        <small className="position-absolute bottom-0 end-0 m-1">
+                            {isEventOption && <Pen size={24} color={isDarkMode ? "#fff" : "#000"} onClick={() => { setOpenModal(true) }} />}
                         </small>
                         {isEventOption && (
                             <div className="d-flex justify-content-start flex-row flex-md-column mt-3 mt-lg-0">
@@ -124,6 +147,16 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
                                         day={cell.date}
                                     />
                                 </div>
+                                <Modal isOpen={openModal} onClose={() => setOpenModal(false)}>
+                                    <p>Přidat poznámku:</p>
+                                    <InputText
+                                        id="note"
+                                        label="Poznámka k datu"
+                                        required={false}
+                                        onChange={(e) => setNoteText(e.target.value)}
+                                    />
+                                    <button className="btn btn-primary mt-3" onClick={() => { setOpenModal(false), handleDayNote(cell.date, noteText) }}>Uložit</button>
+                                </Modal>
                             </div>
                         )
                         }
@@ -135,10 +168,10 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
 
     return (
         <div className={`calendar-wrapper ${isDarkMode ? "calendar-dark-mode" : ""}`}>
-            <div className="container h-100 d-flex flex-column">
+            <div className="container calendar-container h-100 d-flex flex-column">
                 <h4 className="mt-3 mb-4 text-center">
                     <Left size={26} color={isDarkMode ? "#fff" : "#000"} className="me-2 link" onClick={setPrevMonth} />
-                    <span className="calendar-headline">
+                    <span className="calendar-headline" onClick={() => setOpenModal(true)}>
                         {months[monthToShow]} {yearToShow}
                     </span>
                     <Right size={26} color={isDarkMode ? "#fff" : "#000"} className="ms-2 link" onClick={setNextMonth} />
