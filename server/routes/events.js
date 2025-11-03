@@ -197,10 +197,12 @@ router.patch("/:publicId/vote", async (req, res) => {
 
             if (existingVote) {
                 existingVote.status = status; // update existing vote status
+                existingVote.note = vote.note || ""; // update note if provided
             } else {
                 option.votes.push({
                     userId,
-                    status: vote.status
+                    status: vote.status,
+                    note: vote.note || ""
                 });
             }
         }

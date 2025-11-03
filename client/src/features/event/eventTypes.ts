@@ -17,6 +17,7 @@ export type EventOption = {
 export type EventVote = {
     userId: string;
     status: VoteStatus;
+    note?: string;
 }
 
 export type VoteStatus = "yes" | "no" | "maybe";

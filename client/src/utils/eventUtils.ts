@@ -33,10 +33,12 @@ export const aggregateVotesSummary = (
             summary[status].participants.push(name);
 
             if (vote.userId === currentUserId) {
-                userStatus.push({ date, status: status });
+                userStatus.push({ date, status: status, note: vote.note || "" });
             }
         }
     }
+    console.log('votes summary', votesSummary);
+    console.log('user status inside agg', userStatus);
     return { votesSummary, userStatus };
 }
 

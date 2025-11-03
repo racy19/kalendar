@@ -127,7 +127,6 @@ const Event = () => {
         fetchEvent();
     }, [publicId]);
 
-
     // fetch all participants user names -> {_id: name}
     useEffect(() => {
         if (!participantIds.length) return;
@@ -177,6 +176,7 @@ const Event = () => {
         }
         return aggregateVotesSummary(event.options as EventOption[], participants, userId);
     }, [event?.options, participants, userId]);
+    console.log('user status', userStatus)
 
 
     return (

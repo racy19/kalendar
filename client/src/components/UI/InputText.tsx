@@ -3,13 +3,14 @@ interface InputTextProps {
     id: string;
     type?: string;
     placeholder?: string;
+    defaultValue?: string;
     value?: string;
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
     required?: boolean;
     disabled?: boolean;
 }
 
-const InputText = ({ label, id, type = "text", placeholder = "", value, onChange, required = false }: InputTextProps) => {
+const InputText = ({ label, id, type = "text", placeholder = "", defaultValue = "", value, onChange, required = false }: InputTextProps) => {
     return (
         <div className="mb-3">
             {label && (
@@ -23,6 +24,7 @@ const InputText = ({ label, id, type = "text", placeholder = "", value, onChange
                 name={id}
                 type={type}
                 placeholder={placeholder}
+                defaultValue={defaultValue}
                 value={value}
                 onChange={onChange}
                 required={required}

@@ -59,18 +59,24 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
     const calendarDayNumberArray = generateCalendarDays(yearToShow, monthToShow)
 
     const handleVoteChange = (date: string, status: VoteStatus) => {
-        const updatedVotes = localVotes.filter(v => v.date !== date);
-        if (status) {
-            updatedVotes.push({ date, status });
-        }
+        const updatedVotes = localVotes.map(v =>
+            v.date === date
+                ? { ...v, status }
+                : v
+        );
         setLocalVotes(updatedVotes);
         onVoteChange?.(updatedVotes);
     };
 
+    const getDayNote = (date: string): string => {
+        const voteWithNote = localVotes.find(v => v.date === date && v.note);
+        return voteWithNote ? voteWithNote.note || "" : "";
+    }
+
     const handleDayNote = (date: string, note: string) => {
         if (!date) return;
-        if (!localVotes.find(v => v.date === date)) localVotes.push({ date, status: "maybe" }); // default status if note is added without vote
-        
+        if (!localVotes.find(v => v.date === date)) localVotes.push({ date, status: "maybe" }); // default status = maybe - if note is added without vote
+
         const updatedVotes = localVotes.map(v => {
             if (v.date === date) {
                 return { ...v, note };
@@ -81,6 +87,7 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
         onVoteChange?.(updatedVotes);
     };
     console.log(localVotes);
+    console.log(userVoteStatus)
 
     const daysMapped = calendarDayNumberArray.map((row: CalendarRow, rowIndex: Key) => (
         <div key={rowIndex} className="row flex-fill">
@@ -152,10 +159,11 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
                                     <InputText
                                         id="note"
                                         label="Poznámka k datu"
+                                        defaultValue={getDayNote(cell.date)}
                                         required={false}
                                         onChange={(e) => setNoteText(e.target.value)}
                                     />
-                                    <button className="btn btn-primary mt-3" onClick={() => { setOpenModal(false), handleDayNote(cell.date, noteText) }}>Uložit</button>
+                                    <button className="btn btn-primary mt-3" onClick={() => { setOpenModal(false), handleDayNote(cell.date, noteText) }}>Přidat</button>
                                 </Modal>
                             </div>
                         )

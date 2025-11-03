@@ -27,7 +27,7 @@
 }
 
 .calendar-cell {
-    min-height: max(12vh, 120px);
+    min-height: max(14vh, 126px);
     font-size: 0.9rem;
     aspect-ratio: unset;
 }
