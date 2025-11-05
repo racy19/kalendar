@@ -128,7 +128,7 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
                                     color={isDarkMode ? "#bfb" : "#5c5"}
                                     className="calendar-note-icon"
                                     onClick={(e) => { e.stopPropagation(); setOpenModal(true) }}
-                                    isMessage={!!getDayNote(cell.date)}
+                                    isMessage={!!getDayNote(cell.date) || (!showCellRadios && !!getNotesForDate(cell.date, notesByDate || {}))}
                                 />}
                         </small>
                         {isEventOption && (
