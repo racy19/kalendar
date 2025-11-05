@@ -25,21 +25,21 @@ const DayVotesCount = ({ votesByDate, day }: DayVotesCountProps) => {
     return (
             <>
                 <span
-                    style={{ color: '#00A000', fontWeight: 'bold' }}
+                    style={{ color: '#006A38', fontWeight: 'bold' }}
                     data-tooltip-id="participants"
                     data-tooltip-html={participantList.yes}
                 >
                     {yes.count}
                 </span>
                 <span
-                    style={{ color: '#B22222', fontWeight: 'bold' }}
+                    style={{ color: '#D83B3B', fontWeight: 'bold' }}
                     data-tooltip-id="participants"
                     data-tooltip-html={participantList.no}
                 >
                     {no.count}
                 </span>
                 <span
-                    style={{ color: '#FFA500', fontWeight: 'bold' }}
+                    style={{ color: '#E68A00    ', fontWeight: 'bold' }}
                     data-tooltip-id="participants"
                     data-tooltip-html={participantList.maybe}
                 >

@@ -167,10 +167,11 @@ const Event = () => {
     }, [publicId, event?.userId]);
 
     // build vote information for FE operations
-    const { votesSummary, userStatus } = useMemo(() => {
+    const { votesSummary, notesSummary, userStatus } = useMemo(() => {
         if (!event?.options || !participants || !userId) {
             return {
                 votesSummary: {} as VoteSummary,
+                notesSummary: {} as Record<string, string>,
                 userStatus: [] as UserVoteStatus[],
             };
         }
@@ -215,6 +216,8 @@ const Event = () => {
                 votesByDate={votesSummary}
                 handleOnClick={handleDateToggle}
                 userVoteStatus={userStatus}
+                showAllNotes={isUserSameAsEventCreator}
+                notesByDate={notesSummary}
             />
             <div className="container mt-3 mt-lg-4">
                 {errorMessage && (

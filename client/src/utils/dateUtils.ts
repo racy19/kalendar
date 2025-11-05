@@ -68,6 +68,11 @@ export const getCZDateString = (date: Date): string => {
     return date.toLocaleDateString('cs-CZ', options).replace(/\./g, '-'); // returns date in DD-MM-YYYY format
 }
 
+export const getCZDateDotString = (date: Date): string => {
+    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit' };
+    return date.toLocaleDateString('cs-CZ', options); // returns date in DD.MM.YYYY format
+}
+
 export const getDateFromString = (dateString: string): Date => {
     return new Date(dateString); // converts YYYY-MM-DD string to Date object
 }

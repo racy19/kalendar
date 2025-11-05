@@ -60,7 +60,12 @@
     z-index: 1;
 }
 
-.calendar-checkmark:hover {
+.calendar-cell-event small:first-child {
+    color:#111;
+}
+
+.calendar-checkmark:hover,
+.calendar-note-icon:hover {
     cursor: pointer;
 }
 

@@ -1,17 +1,24 @@
 interface PenProps {
     color?: string;
     size?: number;
-    onClick?: () => void;
+    onClick?: (() => void) | ((event: React.MouseEvent<SVGSVGElement>) => void);
     className?: string;
+    isMessage?: boolean;
 }
 
-const Pen: React.FC<PenProps> = ({ color = "#000", size = 56, onClick, className }) => {
+const Pen: React.FC<PenProps> = ({ color = "#000", size = 56, onClick, className, isMessage=false }) => {
     return (
         <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 56 56" onClick={onClick} className={className}>
             <path
                 d="M 41.53,51.51 L 10.13,51.51 L 7.09,50.50 L 5.72,49.27 L 4.85,47.68 L 4.41,45.94 L 4.41,14.11 L 5.14,11.79 L 6.66,9.98 L 8.54,8.97 L 9.98,8.68 L 42.61,8.75 L 38.93,12.44 L 11.43,12.44 L 9.55,13.02 L 8.61,14.11 L 8.18,15.56 L 8.18,44.50 L 8.90,46.52 L 10.13,47.46 L 11.43,47.75 L 40.95,47.61 L 42.25,47.03 L 43.19,45.80 L 43.48,42.33 L 47.17,38.64 L 47.25,45.94 L 46.81,47.68 L 45.94,49.27 L 44.57,50.50 L 41.53,51.51 Z M 51.80,23.44 L 45.94,17.58 L 48.48,14.90 L 49.92,14.18 L 51.51,14.47 L 52.38,15.05 L 54.34,17.00 L 55.06,18.30 L 55.06,19.90 L 54.77,20.48 L 51.80,23.44 Z M 24.89,45.73 L 23.88,45.58 L 23.22,44.35 L 24.96,38.42 L 43.84,19.53 L 49.71,25.40 L 30.97,44.13 L 24.89,45.73 Z M 35.60,22.28 L 14.18,22.28 L 13.53,21.63 L 13.53,20.62 L 14.18,19.97 L 35.60,19.97 L 36.25,20.62 L 36.25,21.63 L 35.60,22.28 Z M 28.80,28.65 L 14.18,28.65 L 13.53,28.00 L 13.53,26.99 L 14.18,26.34 L 28.80,26.34 L 29.45,26.99 L 29.45,28.00 L 28.80,28.65 Z"
                 fill={color}
             />
+    {isMessage && (
+        <g>
+            <circle cx="10" cy="10" r="10" fill="#d00" />  
+            <text x="45" y="50" textAnchor="middle" fontSize="12" fill="#fff" fontWeight="bold">!</text>
+        </g>
+    )}
         </svg>
     )
 }
