@@ -10,14 +10,18 @@ export const aggregateVotesSummary = (
     options: EventOption[],
     participants: Participants,
     currentUserId: string
-): { votesSummary: VoteSummary; notesSummary: Record<string, string>, userStatus: UserVoteStatus[] } => {
-
+): {
+    votesSummary: VoteSummary;
+    notesSummary: Record<string, string[]> | {};
+    userStatus: UserVoteStatus[];
+} => {
     const votesSummary: VoteSummary = {};
-    const notesSummary: Record<string, string> = {};
+    const notesSummary: Record<string, string[]> = {};
     const userStatus: UserVoteStatus[] = [];
 
     for (const option of options) {
         const date = option.date;
+
         const summary: StatusRecord =
             votesSummary[date] ??
             (votesSummary[date] = {
@@ -29,24 +33,23 @@ export const aggregateVotesSummary = (
         for (const vote of option.votes) {
             const name = participants[vote.userId] ?? "Neznámý uživatel";
             const status = vote.status as VoteStatus;
-            const note = vote.note;
-            if (note) {
-                notesSummary[date] = `${name}: ${note}`;
+
+            if (vote.note && vote.note.trim()) {
+                (notesSummary[date] ??= []).push(`${name}: ${vote.note}`);
             }
 
             summary[status].count += 1;
             summary[status].participants.push(name);
 
             if (vote.userId === currentUserId) {
-                userStatus.push({ date, status: status, note: vote.note || "" });
+                userStatus.push({ date, status, note: vote.note || "" });
             }
         }
     }
-    console.log('notes', notesSummary);
-    console.log('votes summary', votesSummary);
-    console.log('user status inside agg', userStatus);
+
     return { votesSummary, notesSummary, userStatus };
-}
+};
+
 
 // return only dates of event, not user votes
 export const aggregateFetchedEvent = (eventData: FetchedEvent[]) => {
@@ -74,15 +77,12 @@ export const getVotingParticipantsCount = (options: EventOption[]): number => {
     return uniqueUserIds.size;
 }
 
-export const getNotesForDate = (date: string, notesSummary: Record<string, string>, showAllNotes: boolean = true): string => {
-    if (showAllNotes) {
-        console.log('notes summary in get notes', notesSummary);
-        if (!notesSummary || !Object.keys(notesSummary).length) return "";
-        return Object.entries(notesSummary)
-            .filter(([noteDate, _]) => noteDate === date)
-            .map(([_, note]) => note)
-            .join('<br>');
-    } else {
-        return notesSummary[date] || "";
-    }
-}
+export const getNotesForDate = (
+  date: string,
+  notesSummary: Record<string, string[]>,
+  showAllNotes: boolean = true
+): string[] => {
+  if (!notesSummary || !notesSummary[date]) return [];
+  const notes = notesSummary[date];
+  return showAllNotes ? notes : (notes.length ? [notes[0] ?? ""] : []);
+};

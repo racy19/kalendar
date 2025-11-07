@@ -44,10 +44,8 @@ const Event = () => {
     const handleDateToggle = (date: string) => {
         if (!isUserSameAsEventCreator) return;
         setUpdatedDates(prev => toggleDate(prev, date));
-        console.log("Updated dates:", updatedDates);
     };
 
-    console.log("datesToVote:", datesToVote);
 
     const handleChangeText = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -171,14 +169,12 @@ const Event = () => {
         if (!event?.options || !participants || !userId) {
             return {
                 votesSummary: {} as VoteSummary,
-                notesSummary: {} as Record<string, string>,
+                notesSummary: {} as Record<string, string[]>,
                 userStatus: [] as UserVoteStatus[],
             };
         }
         return aggregateVotesSummary(event.options as EventOption[], participants, userId);
     }, [event?.options, participants, userId]);
-    console.log('user status', userStatus)
-
 
     return (
         <>

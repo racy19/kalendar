@@ -24,22 +24,22 @@ interface CalendarProps {
     votesByDate?: any;
     userVoteStatus?: UserVoteStatus[];
     showAllNotes?: boolean;
-    notesByDate?: Record<string, string>;
+    notesByDate?: Record<string, string[]>;
 }
 
 type CalendarDay = { day: number; date: string; isCurrentMonth: boolean };
 
 type CalendarRow = CalendarDay[];
 
-const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteChange, votesByDate = {}, updatedEventDates, userVoteStatus, showAllNotes, notesByDate }: CalendarProps) => {
+const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteChange, votesByDate = {}, updatedEventDates, userVoteStatus, showAllNotes, notesByDate = {} }: CalendarProps) => {
     const isDarkMode = useSelector((state: RootState) => state.theme.isDarkMode);
     const current = getCurrentDate();
 
     const [yearToShow, setYearToShow] = useState(current.year);
     const [monthToShow, setMonthToShow] = useState(current.month);
     const [localVotes, setLocalVotes] = useState<UserVoteStatus[]>([]);
-    const [noteText, setNoteText] = useState<string>("");
-    const [openModal, setOpenModal] = useState(false);
+    const [modalDate, setModalDate] = useState<string | null>(null);
+    const [noteText, setNoteText] = useState<string>(""); const [openModal, setOpenModal] = useState(false);
 
     const dayRow = ["Po", "Út", "St", "Čt", "Pá", "So", "Ne"];
     const months = [
@@ -76,6 +76,7 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
     }
 
     const handleDayNote = (date: string, note: string) => {
+        debugger
         if (!date) return;
         if (!localVotes.find(v => v.date === date)) localVotes.push({ date, status: "maybe" }); // default status = maybe - if note is added without vote
 
@@ -88,9 +89,6 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
         setLocalVotes(updatedVotes);
         onVoteChange?.(updatedVotes);
     };
-    console.log(localVotes);
-    console.log(userVoteStatus)
-    console.log(votesByDate)
 
     const daysMapped = calendarDayNumberArray.map((row: CalendarRow, rowIndex: Key) => (
         <div key={rowIndex} className="row flex-fill">
@@ -127,8 +125,8 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
                                     size={24}
                                     color={isDarkMode ? "#bfb" : "#5c5"}
                                     className="calendar-note-icon"
-                                    onClick={(e) => { e.stopPropagation(); setOpenModal(true) }}
-                                    isMessage={!!getDayNote(cell.date) || (!showCellRadios && !!getNotesForDate(cell.date, notesByDate || {}))}
+                                    onClick={(e) => { e.stopPropagation(); setNoteText(getDayNote(cell.date)); setModalDate(cell.date) }}
+                                    isMessage={!!getDayNote(cell.date).length || (!showCellRadios && !!getNotesForDate(cell.date, notesByDate || {}).length)}
                                 />}
                         </small>
                         {isEventOption && (
@@ -168,7 +166,9 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
                                     {showAllNotes &&
                                         <>
                                             <h5>Poznámky k datu {getCZDateDotString(new Date(cell.date))}:</h5>
-                                            <p>{getNotesForDate(cell.date, notesByDate || {}) || "Žádné poznámky"}</p>
+                                            {getNotesForDate(cell.date, notesByDate).length ? getNotesForDate(cell.date, notesByDate).map((note, i) => (
+                                                <p key={i}>{note}</p>
+                                            )) : <p>"Žádné poznámky"</p>}
                                         </>}
 
                                     {!showAllNotes && (
@@ -223,6 +223,35 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
 
                 <div className="calendar-body flex-grow-1">{daysMapped}</div>
             </div>
+            <Modal isOpen={!!modalDate} onClose={() => setModalDate(null)}>
+                {showAllNotes ? (
+                    <>
+                        <h5>Poznámky k datu {modalDate ? getCZDateDotString(new Date(modalDate)) : ""}:</h5>
+                        <p>{modalDate ? (getNotesForDate(modalDate, notesByDate || {}) || "Žádné poznámky") : ""}</p>
+                    </>
+                ) : (
+                    <>
+                        <p>Přidat poznámku:</p>
+                        <InputText
+                            id="note"
+                            label="Poznámka k datu"
+                            value={noteText}
+                            required={false}
+                            onChange={(e) => setNoteText(e.target.value)}
+                        />
+                        <button
+                            className="btn btn-primary mt-3"
+                            onClick={() => {
+                                if (modalDate) handleDayNote(modalDate, noteText);
+                                setModalDate(null);
+                            }}
+                        >
+                            Přidat
+                        </button>
+                    </>
+                )}
+            </Modal>
+
         </div>
     );
 };
