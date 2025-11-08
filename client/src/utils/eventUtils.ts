@@ -77,12 +77,13 @@ export const getVotingParticipantsCount = (options: EventOption[]): number => {
     return uniqueUserIds.size;
 }
 
-export const getNotesForDate = (
-  date: string,
-  notesSummary: Record<string, string[]>,
-  showAllNotes: boolean = true
-): string[] => {
-  if (!notesSummary || !notesSummary[date]) return [];
-  const notes = notesSummary[date];
-  return showAllNotes ? notes : (notes.length ? [notes[0] ?? ""] : []);
-};
+    export const getNotesForDate = (
+    date: string,
+    notesSummary: Record<string, string[]>,
+    showAllNotes: boolean = true
+    ): string[] => {
+    if (!notesSummary || !notesSummary[date]) return [];
+    const notes = notesSummary[date];
+    console.log('notes for date', notes);
+    return showAllNotes ? notes : (notes.length ? [notes[0] ?? ""] : []);
+    };

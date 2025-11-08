@@ -1,4 +1,4 @@
-import { Key, useState } from "react";
+import React, { Key, useState } from "react";
 import CheckmarkYes from "./UI/icons/CheckmarkYes";
 import CheckmarkMaybe from "./UI/icons/CheckmarkMaybe";
 import CheckmarkNo from "./UI/icons/CheckmarkNo";
@@ -39,7 +39,7 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
     const [monthToShow, setMonthToShow] = useState(current.month);
     const [localVotes, setLocalVotes] = useState<UserVoteStatus[]>([]);
     const [modalDate, setModalDate] = useState<string | null>(null);
-    const [noteText, setNoteText] = useState<string>(""); const [openModal, setOpenModal] = useState(false);
+    const [noteText, setNoteText] = useState<string>("");
 
     const dayRow = ["Po", "Út", "St", "Čt", "Pá", "So", "Ne"];
     const months = [
@@ -99,6 +99,8 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
                 const isEventOption = isDateInSelected(cell.date, eventDates || []);
                 const isDateInUpdated = isDateInSelected(cell.date, updatedEventDates || []);
                 const isRemovedEventOption = isEventOption && !isDateInSelected(cell.date, updatedEventDates || []);
+                // const notes = getNotesForDate(modalDate || "", notesByDate);
+
 
                 return (
                     <div
@@ -132,7 +134,7 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
                         {isEventOption && (
                             <div className="d-flex justify-content-start flex-row flex-md-column mt-3 mt-lg-0">
                                 {showCellRadios && (
-                                    <div className="d-flex justify-content-start flex-column flex-md-row">
+                                    <div className="d-flex justify-content-start flex-column flex-md-row" onClick={e => e.stopPropagation()}>
                                         <CheckmarkYes
                                             size={24}
                                             onToggle={() => handleVoteChange(cell.date, "yes")}
@@ -156,43 +158,13 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
                                         />
                                     </div>
                                 )}
-                                <div className="d-flex justify-content-start flex-column flex-md-row gap-1 gap-md-3 ms-2">
+                                <div className="d-flex justify-content-start flex-column flex-md-row gap-1 gap-md-3 ms-2" onClick={e => e.stopPropagation()}>
                                     <DayVotesCount
                                         votesByDate={votesByDate}
                                         day={cell.date}
                                     />
                                 </div>
-                                <Modal isOpen={openModal} onClose={() => setOpenModal(false)}>
-                                    {showAllNotes &&
-                                        <>
-                                            <h5>Poznámky k datu {getCZDateDotString(new Date(cell.date))}:</h5>
-                                            {getNotesForDate(cell.date, notesByDate).length ? getNotesForDate(cell.date, notesByDate).map((note, i) => (
-                                                <p key={i}>{note}</p>
-                                            )) : <p>"Žádné poznámky"</p>}
-                                        </>}
 
-                                    {!showAllNotes && (
-                                        <>
-                                            <p>Přidat poznámku:</p>
-                                            <InputText
-                                                id="note"
-                                                label="Poznámka k datu"
-                                                defaultValue={getDayNote(cell.date)}
-                                                required={false}
-                                                onChange={(e) => setNoteText(e.target.value)}
-                                            />
-                                            <button
-                                                className="btn btn-primary mt-3"
-                                                onClick={() => {
-                                                    setOpenModal(false);
-                                                    handleDayNote(cell.date, noteText);
-                                                }}
-                                            >
-                                                Přidat
-                                            </button>
-                                        </>
-                                    )}
-                                </Modal>
                             </div>
                         )
                         }
@@ -207,7 +179,7 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
             <div className="container calendar-container h-100 d-flex flex-column">
                 <h4 className="mt-3 mb-4 text-center">
                     <Left size={26} color={isDarkMode ? "#fff" : "#000"} className="me-2 link" onClick={setPrevMonth} />
-                    <span className="calendar-headline" onClick={() => setOpenModal(true)}>
+                    <span className="calendar-headline">
                         {months[monthToShow]} {yearToShow}
                     </span>
                     <Right size={26} color={isDarkMode ? "#fff" : "#000"} className="ms-2 link" onClick={setNextMonth} />
@@ -227,7 +199,8 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
                 {showAllNotes ? (
                     <>
                         <h5>Poznámky k datu {modalDate ? getCZDateDotString(new Date(modalDate)) : ""}:</h5>
-                        <p>{modalDate ? (getNotesForDate(modalDate, notesByDate || {}) || "Žádné poznámky") : ""}</p>
+                        <div>{modalDate 
+                        ? (getNotesForDate(modalDate, notesByDate || {}).map((note, i) => <React.Fragment key={i}>{note}<br /></React.Fragment>) || "Žádné poznámky") : ""}</div>
                     </>
                 ) : (
                     <>
