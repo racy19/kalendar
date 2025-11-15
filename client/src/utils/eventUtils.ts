@@ -39,13 +39,16 @@ export const aggregateVotesSummary = (
             }
 
             summary[status].count += 1;
-            summary[status].participants.push(name);
+            summary[status].participants.push({ name: name, note: vote.note || "" });
 
             if (vote.userId === currentUserId) {
                 userStatus.push({ date, status, note: vote.note || "" });
             }
         }
     }
+    console.log("Aggregated Votes Summary:", votesSummary);
+    console.log("User Vote Status:", userStatus);
+    console.log("Notes Summary:", notesSummary);
 
     return { votesSummary, notesSummary, userStatus };
 };
@@ -77,13 +80,12 @@ export const getVotingParticipantsCount = (options: EventOption[]): number => {
     return uniqueUserIds.size;
 }
 
-    export const getNotesForDate = (
+export const getNotesForDate = (
     date: string,
     notesSummary: Record<string, string[]>,
     showAllNotes: boolean = true
-    ): string[] => {
+): string[] => {
     if (!notesSummary || !notesSummary[date]) return [];
     const notes = notesSummary[date];
-    console.log('notes for date', notes);
     return showAllNotes ? notes : (notes.length ? [notes[0] ?? ""] : []);
-    };
+};

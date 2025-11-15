@@ -52,15 +52,15 @@ export type VoteSummary = {
 export type StatusRecord = {
     yes: {
         count: number,
-        participants: string[]
+        participants: {name: string, note: string}[]
     },
     no: {
         count: number,
-        participants: string[]
+        participants: {name: string, note: string}[]
     },
     maybe: {
         count: number,
-        participants: string[]
+        participants: {name: string, note: string}[]
     },
 }
 

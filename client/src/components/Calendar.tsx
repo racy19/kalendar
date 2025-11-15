@@ -158,7 +158,7 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
                                         />
                                     </div>
                                 )}
-                                <div className="d-flex justify-content-start flex-column flex-md-row gap-1 gap-md-3 ms-2" onClick={e => e.stopPropagation()}>
+                                <div className="" onClick={e => e.stopPropagation()}>
                                     <DayVotesCount
                                         votesByDate={votesByDate}
                                         day={cell.date}
