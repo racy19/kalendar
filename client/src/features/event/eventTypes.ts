@@ -62,6 +62,7 @@ export type StatusRecord = {
         count: number,
         participants: {name: string, note: string}[]
     },
+    attendanceRate?: number; // 0.8 * yesCount + 0.2 * maybeCount
 }
 
 // type for event descrtiption

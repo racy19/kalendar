@@ -6,6 +6,7 @@ import Modal from "../Modal";
 export type DayVotesCountProps = {
     votesByDate: VoteSummary;
     day: string;
+    background?: boolean;
 }
 
 // helpers for participant list formatting
@@ -21,7 +22,7 @@ const listFor = (arr: { name: string; note: string }[]) =>
  * @param date is stringified date
  * @returns JSX with YES, NO, MAYBE counts for each date, with tooltip with names of participants on it
  */
-const DayVotesCount = ({ votesByDate, day }: DayVotesCountProps) => {
+const DayVotesCount = ({ votesByDate, day, background = false }: DayVotesCountProps) => {
     const votesByDateSize = (Object.keys(votesByDate)).length;
     if (!votesByDateSize) return;
     if (!votesByDate[day]) return;
@@ -36,7 +37,7 @@ const DayVotesCount = ({ votesByDate, day }: DayVotesCountProps) => {
 
     return (
         <>
-        <div onClick={() => setModalOpen(true)} className="d-flex justify-content-start flex-column flex-md-row gap-1 gap-md-3 ms-2 cursor-pointer">
+        <div onClick={() => setModalOpen(true)} className="d-flex justify-content-center flex-column flex-md-row gap-1 gap-md-3" style={{ backgroundColor: background ? '#dfd' : "transparent", borderRadius: '5px', padding: '0 2px' }}>
             <span
                 style={{ color: '#006A38', fontWeight: 'bold', cursor: 'pointer' }}
                 data-tooltip-id="participants"

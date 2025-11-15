@@ -101,6 +101,14 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
                 const isRemovedEventOption = isEventOption && !isDateInSelected(cell.date, updatedEventDates || []);
                 // const notes = getNotesForDate(modalDate || "", notesByDate);
 
+                // get background color based on attendance rate
+                const cellDateKey = cell.date;
+                const attendanceRate = votesByDate[cellDateKey]?.attendanceRate || 0;
+                const baseColor = isDarkMode ? { r: 50, g: 66, b: 45 } : { r: 223, g: 255, b: 212 }; // base green color
+                const attendanceRateColor = isDarkMode
+                    ? `rgb(${baseColor.r + attendanceRate * 52}, ${baseColor.g + attendanceRate * 189}, ${baseColor.b + attendanceRate * 6})`
+                    : `rgb(${baseColor.r - attendanceRate * 121}, ${baseColor.g}, ${baseColor.b - attendanceRate * 161})`;
+                    console.log(cellDateKey, votesByDate[cellDateKey]?.attendanceRate, attendanceRateColor);
 
                 return (
                     <div
@@ -116,25 +124,26 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
                                             ? ""
                                             : `${isDarkMode ? "black-dark-mode text-secondary" : "text-muted bg-light"}`
                             }`}
+                        style={{ background: isEventOption && showAllNotes ? attendanceRateColor : "transparent" }}
                         onClick={() => handleOnClick?.(cell.date)}
                     >
                         <small className="position-absolute top-0 end-0 m-1">
                             {cell.day}
                         </small>
-                        <small className="position-absolute bottom-0 end-0 m-1">
-                            {isEventOption &&
-                                <Pen
-                                    size={24}
-                                    color={isDarkMode ? "#bfb" : "#5c5"}
-                                    className="calendar-note-icon"
-                                    onClick={(e) => { e.stopPropagation(); setNoteText(getDayNote(cell.date)); setModalDate(cell.date) }}
-                                    isMessage={!!getDayNote(cell.date).length || (!showCellRadios && !!getNotesForDate(cell.date, notesByDate || {}).length)}
-                                />}
-                        </small>
+                        {isEventOption && <small className="position-absolute bottom-0 end-0 m-1" style={{ backgroundColor: showAllNotes ? "#dfd" : "transparent", borderRadius: '5px', padding: '2px', fontWeight: 'bold', fontSize: '0.75rem' }}>
+
+                            <Pen
+                                size={24}
+                                color={isDarkMode ? "#006A38" : "#006A38"}
+                                className="calendar-note-icon"
+                                onClick={(e) => { e.stopPropagation(); setNoteText(getDayNote(cell.date)); setModalDate(cell.date) }}
+                                isMessage={!!getDayNote(cell.date).length || (!showCellRadios && !!getNotesForDate(cell.date, notesByDate || {}).length)}
+                            />
+                        </small>}
                         {isEventOption && (
                             <div className="d-flex justify-content-start flex-row flex-md-column mt-3 mt-lg-0">
                                 {showCellRadios && (
-                                    <div className="d-flex justify-content-start flex-column flex-md-row" onClick={e => e.stopPropagation()}>
+                                    <div className="d-flex justify-content-center flex-column flex-md-row" onClick={e => e.stopPropagation()}>
                                         <CheckmarkYes
                                             size={24}
                                             onToggle={() => handleVoteChange(cell.date, "yes")}
@@ -162,6 +171,7 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
                                     <DayVotesCount
                                         votesByDate={votesByDate}
                                         day={cell.date}
+                                        background={showAllNotes}
                                     />
                                 </div>
 
@@ -199,8 +209,8 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
                 {showAllNotes ? (
                     <>
                         <h5>Poznámky k datu {modalDate ? getCZDateDotString(new Date(modalDate)) : ""}:</h5>
-                        <div>{modalDate 
-                        ? (getNotesForDate(modalDate, notesByDate || {}).map((note, i) => <React.Fragment key={i}>{note}<br /></React.Fragment>) || "Žádné poznámky") : ""}</div>
+                        <div>{modalDate
+                            ? (getNotesForDate(modalDate, notesByDate || {}).map((note, i) => <React.Fragment key={i}>{note}<br /></React.Fragment>) || "Žádné poznámky") : ""}</div>
                     </>
                 ) : (
                     <>

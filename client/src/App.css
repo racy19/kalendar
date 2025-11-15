@@ -46,9 +46,9 @@
     opacity: 0.7;
 }
 
-.calendar-cell-event::before {
+/* .calendar-cell-event::before {
     background-color: #DBF9DB;
-}
+} */
 
 .calendar-cell-event-removed::before {
     background-color: #F9DBDB;
@@ -60,8 +60,8 @@
     z-index: 1;
 }
 
-.calendar-cell-event small:first-child {
-    color:#111;
+.calendar-dark-mode .calendar-cell-event small:first-child {
+    color:#fff;
 }
 
 .calendar-checkmark:hover,

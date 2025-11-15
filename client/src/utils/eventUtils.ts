@@ -1,4 +1,17 @@
 import { EventOption, FetchedEvent, Participants, StatusRecord, UserVoteStatus, VoteStatus, VoteSummary } from "../features/event/eventTypes";
+
+function computeAttendanceRate(
+    counts: { yes: number; no: number; maybe: number },
+    weights = { yes: 0.8, maybe: 0.2 }
+): number {
+    const expected =
+        counts.yes * weights.yes +
+        counts.maybe * weights.maybe;
+
+    const total = counts.yes + counts.no + counts.maybe;
+    return total ? expected / total : 0;
+}
+
 /**
  * @description Aggregates votes from event options into a summary and user status.
  * @param options - Array of event options containing dates and votes.
@@ -9,7 +22,8 @@ import { EventOption, FetchedEvent, Participants, StatusRecord, UserVoteStatus, 
 export const aggregateVotesSummary = (
     options: EventOption[],
     participants: Participants,
-    currentUserId: string
+    currentUserId: string,
+    weights = { yes: 0.8, maybe: 0.2 }
 ): {
     votesSummary: VoteSummary;
     notesSummary: Record<string, string[]> | {};
@@ -28,6 +42,7 @@ export const aggregateVotesSummary = (
                 yes: { count: 0, participants: [] },
                 no: { count: 0, participants: [] },
                 maybe: { count: 0, participants: [] },
+                attendanceRate: 0,
             });
 
         for (const vote of option.votes) {
@@ -46,13 +61,24 @@ export const aggregateVotesSummary = (
             }
         }
     }
+    for (const date in votesSummary) {
+        const s = votesSummary[date];
+        if (s)
+            s.attendanceRate = computeAttendanceRate(
+                {
+                    yes: s.yes.count,
+                    no: s.no.count,
+                    maybe: s.maybe.count,
+                },
+                weights
+            );
+    }
     console.log("Aggregated Votes Summary:", votesSummary);
     console.log("User Vote Status:", userStatus);
     console.log("Notes Summary:", notesSummary);
 
     return { votesSummary, notesSummary, userStatus };
 };
-
 
 // return only dates of event, not user votes
 export const aggregateFetchedEvent = (eventData: FetchedEvent[]) => {
@@ -68,7 +94,6 @@ export const aggregateFetchedEvent = (eventData: FetchedEvent[]) => {
     });
     return filteredData;
 };
-
 
 export const getVotingParticipantsCount = (options: EventOption[]): number => {
     const uniqueUserIds = new Set<string>();
@@ -89,3 +114,5 @@ export const getNotesForDate = (
     const notes = notesSummary[date];
     return showAllNotes ? notes : (notes.length ? [notes[0] ?? ""] : []);
 };
+
+
