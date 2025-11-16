@@ -173,7 +173,7 @@ const Event = () => {
                 userStatus: [] as UserVoteStatus[],
             };
         }
-        return aggregateVotesSummary(event.options as EventOption[], participants, userId);
+        return aggregateVotesSummary(event.options as EventOption[], participants, userId, participantIds.length);
     }, [event?.options, participants, userId]);
 
     return (

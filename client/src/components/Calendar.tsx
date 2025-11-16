@@ -1,4 +1,4 @@
-import React, { Key, useState } from "react";
+import { Key, useState } from "react";
 import CheckmarkYes from "./UI/icons/CheckmarkYes";
 import CheckmarkMaybe from "./UI/icons/CheckmarkMaybe";
 import CheckmarkNo from "./UI/icons/CheckmarkNo";
@@ -90,6 +90,8 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
         onVoteChange?.(updatedVotes);
     };
 
+    console.log("Calendar Votes By Date:", votesByDate);
+
     const daysMapped = calendarDayNumberArray.map((row: CalendarRow, rowIndex: Key) => (
         <div key={rowIndex} className="row flex-fill">
             {row.map((cell: CalendarDay, colIndex: Key) => {
@@ -104,11 +106,11 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
                 // get background color based on attendance rate
                 const cellDateKey = cell.date;
                 const attendanceRate = votesByDate[cellDateKey]?.attendanceRate || 0;
-                const baseColor = isDarkMode ? { r: 50, g: 66, b: 45 } : { r: 223, g: 255, b: 212 }; // base green color
+                const baseColor = isDarkMode ? { r: 46, g: 51, b: 44 } : { r: 242, g: 255, b: 237 }; // base green color
                 const attendanceRateColor = isDarkMode
                     ? `rgb(${baseColor.r + attendanceRate * 52}, ${baseColor.g + attendanceRate * 189}, ${baseColor.b + attendanceRate * 6})`
                     : `rgb(${baseColor.r - attendanceRate * 121}, ${baseColor.g}, ${baseColor.b - attendanceRate * 161})`;
-                    console.log(cellDateKey, votesByDate[cellDateKey]?.attendanceRate, attendanceRateColor);
+                // console.log(cellDateKey, votesByDate[cellDateKey]?.attendanceRate, attendanceRateColor);
 
                 return (
                     <div
@@ -130,11 +132,11 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
                         <small className="position-absolute top-0 end-0 m-1">
                             {cell.day}
                         </small>
-                        {isEventOption && <small className="position-absolute bottom-0 end-0 m-1" style={{ backgroundColor: showAllNotes ? "#dfd" : "transparent", borderRadius: '5px', padding: '2px', fontWeight: 'bold', fontSize: '0.75rem' }}>
+                        {isEventOption && <small className="position-absolute bottom-0 end-0 m-1" style={{ backgroundColor: showAllNotes ? (isDarkMode ? "#2c2c2c" : "#fff") : "transparent", borderRadius: '5px', padding: '2px', fontWeight: 'bold', fontSize: '0.75rem' }}>
 
                             <Pen
-                                size={24}
-                                color={isDarkMode ? "#006A38" : "#006A38"}
+                                size={20}
+                                color={isDarkMode ? "#66FF33" : "#006A38"}
                                 className="calendar-note-icon"
                                 onClick={(e) => { e.stopPropagation(); setNoteText(getDayNote(cell.date)); setModalDate(cell.date) }}
                                 isMessage={!!getDayNote(cell.date).length || (!showCellRadios && !!getNotesForDate(cell.date, notesByDate || {}).length)}
@@ -171,7 +173,7 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
                                     <DayVotesCount
                                         votesByDate={votesByDate}
                                         day={cell.date}
-                                        background={showAllNotes}
+                                        background={showAllNotes ? (isDarkMode ? "#2c2c2c" : "#fff") : "transparent"}
                                     />
                                 </div>
 
@@ -209,8 +211,15 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
                 {showAllNotes ? (
                     <>
                         <h5>Poznámky k datu {modalDate ? getCZDateDotString(new Date(modalDate)) : ""}:</h5>
-                        <div>{modalDate
-                            ? (getNotesForDate(modalDate, notesByDate || {}).map((note, i) => <React.Fragment key={i}>{note}<br /></React.Fragment>) || "Žádné poznámky") : ""}</div>
+                        <div>
+                            {modalDate
+                                ? getNotesForDate(modalDate, notesByDate || {}).map((note, i) => (
+                                    <div key={i}
+                                        dangerouslySetInnerHTML={{ __html: note }} />
+                                ))
+                                : "Žádné poznámky"}
+                        </div>
+
                     </>
                 ) : (
                     <>

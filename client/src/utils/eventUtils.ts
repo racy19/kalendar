@@ -2,13 +2,14 @@ import { EventOption, FetchedEvent, Participants, StatusRecord, UserVoteStatus, 
 
 function computeAttendanceRate(
     counts: { yes: number; no: number; maybe: number },
-    weights = { yes: 0.8, maybe: 0.2 }
+    weights = { yes: 0.8, maybe: 0.2 },
+    userCount?: number
 ): number {
     const expected =
         counts.yes * weights.yes +
         counts.maybe * weights.maybe;
 
-    const total = counts.yes + counts.no + counts.maybe;
+    const total = userCount ? userCount : counts.yes + counts.no + counts.maybe;
     return total ? expected / total : 0;
 }
 
@@ -23,7 +24,7 @@ export const aggregateVotesSummary = (
     options: EventOption[],
     participants: Participants,
     currentUserId: string,
-    weights = { yes: 0.8, maybe: 0.2 }
+    votingUserCount?: number
 ): {
     votesSummary: VoteSummary;
     notesSummary: Record<string, string[]> | {};
@@ -32,6 +33,8 @@ export const aggregateVotesSummary = (
     const votesSummary: VoteSummary = {};
     const notesSummary: Record<string, string[]> = {};
     const userStatus: UserVoteStatus[] = [];
+
+    const weights = { yes: 0.8, maybe: 0.2 };
 
     for (const option of options) {
         const date = option.date;
@@ -48,9 +51,10 @@ export const aggregateVotesSummary = (
         for (const vote of option.votes) {
             const name = participants[vote.userId] ?? "Neznámý uživatel";
             const status = vote.status as VoteStatus;
+            const statusCZ = status === "yes" ? "ano" : status === "no" ? "ne" : "možná";
 
             if (vote.note && vote.note.trim()) {
-                (notesSummary[date] ??= []).push(`${name}: ${vote.note}`);
+                (notesSummary[date] ??= []).push(`<strong>${name}</strong> ${status ? "(" + statusCZ + ")" : ""}: ${vote.note}`);
             }
 
             summary[status].count += 1;
@@ -70,7 +74,8 @@ export const aggregateVotesSummary = (
                     no: s.no.count,
                     maybe: s.maybe.count,
                 },
-                weights
+                weights,
+                votingUserCount
             );
     }
     console.log("Aggregated Votes Summary:", votesSummary);

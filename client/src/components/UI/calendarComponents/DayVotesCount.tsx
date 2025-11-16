@@ -2,11 +2,12 @@ import { Tooltip } from "react-tooltip";
 import { VoteSummary } from "../../../features/event/eventTypes";
 import { useState } from "react";
 import Modal from "../Modal";
+import { getCZDateDotString } from "../../../utils/dateUtils";
 
 export type DayVotesCountProps = {
     votesByDate: VoteSummary;
     day: string;
-    background?: boolean;
+    background?: string;
 }
 
 // helpers for participant list formatting
@@ -22,7 +23,7 @@ const listFor = (arr: { name: string; note: string }[]) =>
  * @param date is stringified date
  * @returns JSX with YES, NO, MAYBE counts for each date, with tooltip with names of participants on it
  */
-const DayVotesCount = ({ votesByDate, day, background = false }: DayVotesCountProps) => {
+const DayVotesCount = ({ votesByDate, day, background = 'transparent' }: DayVotesCountProps) => {
     const votesByDateSize = (Object.keys(votesByDate)).length;
     if (!votesByDateSize) return;
     if (!votesByDate[day]) return;
@@ -37,7 +38,7 @@ const DayVotesCount = ({ votesByDate, day, background = false }: DayVotesCountPr
 
     return (
         <>
-        <div onClick={() => setModalOpen(true)} className="d-flex justify-content-center flex-column flex-md-row gap-1 gap-md-3" style={{ backgroundColor: background ? '#dfd' : "transparent", borderRadius: '5px', padding: '0 2px' }}>
+        <div onClick={() => setModalOpen(true)} className="d-flex justify-content-center flex-column flex-md-row gap-1 gap-md-3" style={{ backgroundColor: background, borderRadius: '5px', padding: '0 4px', maxWidth: '80px' }}>
             <span
                 style={{ color: '#006A38', fontWeight: 'bold', cursor: 'pointer' }}
                 data-tooltip-id="participants"
@@ -66,7 +67,7 @@ const DayVotesCount = ({ votesByDate, day, background = false }: DayVotesCountPr
                 style={{ zIndex: 9999 }}
             />
             <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} >
-                <h5>Hlasování k datu {day}</h5>
+                <h5>Hlasování k datu {getCZDateDotString(new Date(day))}</h5>
                 <h6 className="mt-3">ANO ({yes.count}):</h6>
                 <div dangerouslySetInnerHTML={{ __html: participantList.yes || "" }}></div>
                 <h6 className="mt-3">NE ({no.count}):</h6>
