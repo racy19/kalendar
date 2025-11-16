@@ -115,12 +115,12 @@ const Calendar = ({ eventDates, showCellRadios = false, handleOnClick, onVoteCha
                 return (
                     <div
                         key={colIndex}
-                        className={`${isDarkMode ? "" : "border"} col position-relative text-start p-1 p-sm-2 calendar-cell ${isEventOption ? "calendar-cell-event" : ""}
-                            ${isDateInUpdated
+                        className={`${isDarkMode ? "" : "border"} col position-relative text-start p-1 p-sm-2 calendar-cell ${(isEventOption && !showAllNotes) ? "calendar-cell-event" : ""}
+                            ${isDateInUpdated && !isEventOption
                                 ? "calendar-cell-event"
                                 : isRemovedEventOption
                                     ? "calendar-cell-event-removed"
-                                    : isToday
+                                    : isToday && !isDateInUpdated
                                         ? "bg-primary text-white"
                                         : cell.isCurrentMonth
                                             ? ""

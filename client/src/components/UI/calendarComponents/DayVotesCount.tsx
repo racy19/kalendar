@@ -38,7 +38,7 @@ const DayVotesCount = ({ votesByDate, day, background = 'transparent' }: DayVote
 
     return (
         <>
-        <div onClick={() => setModalOpen(true)} className="d-flex justify-content-center flex-column flex-md-row gap-1 gap-md-3" style={{ backgroundColor: background, borderRadius: '5px', padding: '0 4px', maxWidth: '80px' }}>
+        <div onClick={() => setModalOpen(true)} className="d-flex justify-content-center flex-column flex-md-row gap-1 gap-md-3" style={{ backgroundColor: background, borderRadius: '5px', padding: '0 4px', maxWidth: '80px', margin: '0 auto' }}>
             <span
                 style={{ color: '#006A38', fontWeight: 'bold', cursor: 'pointer' }}
                 data-tooltip-id="participants"
